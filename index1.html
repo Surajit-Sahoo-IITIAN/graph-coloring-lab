@@ -1,0 +1,2919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Graph Coloring &amp; Edge Coloring — Interactive Study Lab</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- KaTeX for clean mathematical notation -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+    code, pre, .font-mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .canvas-grid {
+      background-color: #ffffff;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .pseudo-line {
+      border-radius: 0.375rem;
+      padding: 0.18rem 0.5rem;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .pseudo-active {
+      background-color: rgba(99, 102, 241, 0.22);
+      color: #e0e7ff;
+      border-left: 3px solid #818cf8;
+    }
+    .pseudo-active-emerald {
+      background-color: rgba(16, 185, 129, 0.22);
+      color: #d1fae5;
+      border-left: 3px solid #34d399;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Toast Notification -->
+  <div id="toast-banner" class="fixed bottom-5 right-5 z-50 hidden max-w-sm rounded-xl bg-slate-900 text-white px-4 py-3 text-xs sm:text-sm font-medium shadow-xl border border-slate-700/80 transition-all"></div>
+
+  <!-- Top Sticky Navigation Header -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200/90 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
+        <!-- Brand & Course Title -->
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex h-2.5 w-2.5 rounded-full bg-indigo-600"></span>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">B.Tech CSE &bull; Discrete Mathematics &amp; Graph Theory</span>
+            </div>
+            <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
+              Graph Coloring &amp; Edge Coloring Lab
+            </h1>
+          </div>
+          <span class="md:hidden text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">Surajit Sahoo</span>
+        </div>
+
+        <!-- Main Section Switcher -->
+        <nav aria-label="Primary Sections" class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl self-start md:self-auto">
+          <button id="nav-vertex" onclick="switchMainSection('vertex')"
+            class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-indigo-600 text-white shadow-xs">
+            <span>Vertex Coloring</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-white/20 font-mono">$\chi(G)$</span>
+          </button>
+          <button id="nav-edge" onclick="switchMainSection('edge')"
+            class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-white/60">
+            <span>Edge Coloring</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-700 font-mono">$\chi'(G)$</span>
+          </button>
+        </nav>
+
+        <div class="hidden md:flex items-center gap-2 text-xs text-slate-500">
+          <span class="px-2.5 py-1 rounded-md bg-slate-100 font-medium text-slate-700">Surajit Sahoo</span>
+        </div>
+      </div>
+
+      <!-- Sub-Page Switcher Bar (3 Separate Sub-Pages) -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-2.5 pt-1 text-xs font-semibold border-t border-slate-100">
+        <span class="text-slate-400 uppercase tracking-wider text-[10px] font-bold mr-1 shrink-0">Sub-Page:</span>
+        <button id="subtab-motivation" onclick="switchSubPage('motivation')"
+          class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition shrink-0">
+          1. Motivation &amp; Context
+        </button>
+        <button id="subtab-theory" onclick="switchSubPage('theory')"
+          class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 transition shrink-0">
+          2. Definitions &amp; Theorems
+        </button>
+        <button id="subtab-lab" onclick="switchSubPage('lab')"
+          class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 transition shrink-0">
+          3. Visualization &amp; Greedy Lab
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12 flex-1 w-full">
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 1: VERTEX COLORING                                          -->
+    <!-- ===================================================================== -->
+    <section id="section-vertex" class="space-y-8">
+
+      <!-- 1.1 MOTIVATION & CONTEXT (SUB-PAGE 1) -->
+      <div id="sub-motivation" data-subpage="motivation" class="subpage-panel space-y-6">
+        <div class="bg-gradient-to-r from-indigo-950 via-slate-900 to-violet-950 text-white rounded-2xl p-6 sm:p-8 shadow-md">
+          <div class="max-w-4xl">
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 mb-3">
+              Vertex Coloring &bull; Sub-Page 1: Motivation &amp; Context
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Why Do We Color Vertices? Modeling Clashes &amp; Resource Reuse
+            </h2>
+            <p class="mt-3 text-slate-200 text-sm sm:text-base leading-relaxed">
+              In many allocation and scheduling problems, distinct items compete for reusable slots, channels, or hardware units, while certain pairs cannot share the same assignment. Below are two concrete applications structured around the core question, the underlying conflict problem, the graph-based solution, and why that naturally motivates <strong>vertex coloring</strong>.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Application 1: Examination Scheduling -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+                  Application 01 &bull; Exam Scheduling
+                </span>
+                <span class="text-xs font-mono text-slate-500">Course = Vertex &bull; Clash = Edge</span>
+              </div>
+
+              <!-- Concise Structured Motivation -->
+              <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 text-xs sm:text-sm text-slate-700 space-y-1.5">
+                <p><strong>Mathematical Framing:</strong> Let $C = \{A, B, C, D, E\}$ be the set of courses, and let $G = (V, E)$ be the conflict graph with $V = C$ and $E = \{uv : \text{at least one student is enrolled in both } u \text{ and } v\}$, where $E = \{AB, AC, BC, BD, CD, DE\}$.</p>
+                <p><strong>Conflicts &amp; Cliques:</strong> Because $\{A, B, C\}$ forms a triangle ($K_3$), courses $A$, $B$, and $C$ pairwise conflict and require distinct slots; similarly, conflicts on $D$ and $E$ constrain feasible pairings.</p>
+                <p><strong>What the Minimum Will Be:</strong> A valid slot assignment is a proper coloring $f: V \to \{1, 2, \dots, k\}$ with $f(u) \ne f(v)$ for all $uv \in E$, so the minimum number of exam slots is the chromatic number $\chi(G) = 3$ (with $\omega(G) = 3$ giving the lower bound and one optimal partition being $\{A, D\}$, $\{B, E\}$, and $\{C\}$).</p>
+              </div>
+
+              <!-- Visual Diagram: Exam Conflict Graph -> Slot Partition -->
+              <div class="rounded-xl border border-slate-200 bg-white p-3">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Diagram: Conflict Graph &rarr; 3 Time Slots</div>
+                <svg viewBox="0 0 420 118" class="w-full h-28 block">
+                  <!-- Conflict edges -->
+                  <line x1="55" y1="32" x2="125" y2="26" stroke="#94a3b8" stroke-width="2" />
+                  <line x1="55" y1="32" x2="88" y2="92" stroke="#94a3b8" stroke-width="2" />
+                  <line x1="125" y1="26" x2="88" y2="92" stroke="#94a3b8" stroke-width="2" />
+                  <line x1="125" y1="26" x2="185" y2="48" stroke="#94a3b8" stroke-width="2" />
+                  <line x1="88" y1="92" x2="185" y2="48" stroke="#94a3b8" stroke-width="2" />
+                  <line x1="185" y1="48" x2="225" y2="95" stroke="#94a3b8" stroke-width="2" />
+                  <!-- Vertices -->
+                  <circle cx="55" cy="32" r="15" fill="#4f46e5" /><text x="55" y="36" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">A</text>
+                  <circle cx="125" cy="26" r="15" fill="#d97706" /><text x="125" y="30" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">B</text>
+                  <circle cx="88" cy="92" r="15" fill="#059669" /><text x="88" y="96" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">C</text>
+                  <circle cx="185" cy="48" r="15" fill="#4f46e5" /><text x="185" y="52" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">D</text>
+                  <circle cx="225" cy="95" r="15" fill="#d97706" /><text x="225" y="99" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">E</text>
+                  <!-- Arrow -->
+                  <text x="255" y="64" fill="#64748b" font-size="16" font-weight="bold">&rArr;</text>
+                  <!-- Slots -->
+                  <rect x="278" y="14" width="130" height="26" rx="6" fill="#eef2ff" stroke="#c7d2fe" />
+                  <text x="286" y="31" fill="#312e81" font-size="11" font-weight="bold">Slot 1: {A, D}</text>
+                  <rect x="278" y="46" width="130" height="26" rx="6" fill="#fffbeb" stroke="#fde68a" />
+                  <text x="286" y="63" fill="#78350f" font-size="11" font-weight="bold">Slot 2: {B, E}</text>
+                  <rect x="278" y="78" width="130" height="26" rx="6" fill="#ecfdf5" stroke="#a7f3d0" />
+                  <text x="286" y="95" fill="#064e3b" font-size="11" font-weight="bold">Slot 3: {C}</text>
+                </svg>
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-indigo-100 bg-indigo-50/40 p-3.5 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-indigo-950">Try Exam Slots (A–E)</span>
+                <button onclick="resetExamDemo()" class="text-xs font-semibold text-indigo-700 hover:underline">Reset Optimal</button>
+              </div>
+              <div id="exam-courses-grid" class="grid grid-cols-5 gap-2"></div>
+              <div id="exam-status-box" class="rounded-lg px-3 py-2 text-xs font-semibold border"></div>
+            </div>
+          </div>
+
+          <!-- Application 2: Register Allocation -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-violet-50 text-violet-800 border border-violet-200">
+                  Application 02 &bull; Register Allocation
+                </span>
+                <span class="text-xs font-mono text-slate-500">Variable = Vertex &bull; Overlap = Edge</span>
+              </div>
+
+              <!-- Concise Structured Motivation -->
+              <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 text-xs sm:text-sm text-slate-700 space-y-1.5">
+                <p><strong>Question:</strong> Fewest CPU registers so overlapping live variables don't overwrite each other?</p>
+                <p><strong>Problem:</strong> Registers are scarce; sharing one across overlapping live ranges corrupts data.</p>
+                <p><strong>Solution:</strong> Model variables as vertices and overlapping live ranges as edges.</p>
+                <p class="text-indigo-700 font-medium"><strong>Why Vertex Coloring:</strong> Registers are colors and edges forbid equal colors &rarr; min registers = $\chi(G)$.</p>
+              </div>
+
+              <!-- Visual Diagram: Live Intervals -> Interference Graph -->
+              <div class="rounded-xl border border-slate-200 bg-white p-3">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Diagram: Live Ranges &rarr; Interference Graph (P₄)</div>
+                <svg viewBox="0 0 420 118" class="w-full h-28 block">
+                  <!-- Live interval bars -->
+                  <text x="12" y="26" fill="#334155" font-size="11" font-weight="bold">a</text>
+                  <rect x="30" y="15" width="70" height="14" rx="4" fill="#4f46e5" />
+                  <text x="12" y="48" fill="#334155" font-size="11" font-weight="bold">b</text>
+                  <rect x="75" y="37" width="75" height="14" rx="4" fill="#d97706" />
+                  <text x="12" y="70" fill="#334155" font-size="11" font-weight="bold">c</text>
+                  <rect x="125" y="59" width="70" height="14" rx="4" fill="#4f46e5" />
+                  <text x="12" y="92" fill="#334155" font-size="11" font-weight="bold">d</text>
+                  <rect x="170" y="81" width="65" height="14" rx="4" fill="#d97706" />
+                  <!-- Arrow -->
+                  <text x="252" y="60" fill="#64748b" font-size="16" font-weight="bold">&rArr;</text>
+                  <!-- Interference path P4 -->
+                  <line x1="286" y1="56" x2="322" y2="56" stroke="#64748b" stroke-width="2" />
+                  <line x1="322" y1="56" x2="358" y2="56" stroke="#64748b" stroke-width="2" />
+                  <line x1="358" y1="56" x2="394" y2="56" stroke="#64748b" stroke-width="2" />
+                  <circle cx="286" cy="56" r="13" fill="#4f46e5" /><text x="286" y="60" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">a</text>
+                  <circle cx="322" cy="56" r="13" fill="#d97706" /><text x="322" y="60" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">b</text>
+                  <circle cx="358" cy="56" r="13" fill="#4f46e5" /><text x="358" y="60" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">c</text>
+                  <circle cx="394" cy="56" r="13" fill="#d97706" /><text x="394" y="60" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">d</text>
+                  <text x="340" y="95" text-anchor="middle" fill="#334155" font-size="11" font-weight="bold">R₁ &amp; R₂ suffice (2 colors)</text>
+                </svg>
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-violet-100 bg-violet-50/40 p-3.5 space-y-2">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-bold uppercase tracking-wider text-violet-950">Live-Range Case Switcher</span>
+                <div class="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-violet-200 text-xs font-semibold">
+                  <button id="reg-btn-p4" onclick="setRegisterCase('p4')" class="px-2.5 py-1 rounded-md bg-violet-600 text-white">Path P₄</button>
+                  <button id="reg-btn-k3" onclick="setRegisterCase('k3')" class="px-2.5 py-1 rounded-md text-slate-700 hover:bg-slate-100">Triangle K₃</button>
+                </div>
+              </div>
+              <div id="register-case-view" class="space-y-2 text-xs"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.2 DEFINITIONS & THEOREMS (SUB-PAGE 2) -->
+      <div id="sub-theory" data-subpage="theory" class="subpage-panel hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-2xs space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Vertex Coloring &bull; Sub-Page 2: Definitions &amp; Theorems</span>
+            <h2 class="text-2xl font-extrabold text-slate-900 mt-1">Core Definitions, Bounds, Graph Operations &amp; Brooks' Theorem</h2>
+          </div>
+
+          <!-- Definitions Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">Definition &bull; Vertex Coloring</span>
+              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                Given a graph $G=(V,E)$ and a color set $\mathcal{C}$, a <strong>vertex coloring</strong> is a function $c: V(G) \to \mathcal{C}$ assigning a color $c(v)$ to each vertex $v \in V(G)$.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">Definition &bull; Proper Coloring &amp; $k$-Colorability</span>
+              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                A coloring is <strong>proper</strong> if $c(u) \ne c(v)$ for every edge $uv \in E(G)$. A proper coloring using at most $k$ colors is a <strong>proper $k$-coloring</strong>, and $G$ is <strong>$k$-colorable</strong> if one exists.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">Definition &bull; Color Classes &amp; Chromatic Number</span>
+              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                Each set $V_i = \{v \in V(G) : c(v) = i\}$ is a <strong>color class</strong> (an independent set). The <strong>chromatic number</strong> $\chi(G) = \min\{k : G \text{ is } k\text{-colorable}\}$.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">Definition &bull; Clique, Independence, Diameter &amp; Operations</span>
+              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong>Clique number</strong> $\omega(G)$ is the max clique size; <strong>independence number</strong> $\alpha(G)$ is the max independent set size; $\operatorname{diam}(G) = \max d(u,v)$. Disjoint union is $G_1 + G_2$ and <strong>join</strong> is $G_1 \vee G_2$.
+              </p>
+            </div>
+          </div>
+
+          <!-- Theorems List -->
+          <div class="space-y-3 pt-2">
+            <h3 class="text-base font-bold text-slate-900">Key Theorems &amp; Bounds</h3>
+
+            <div class="p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 space-y-1">
+              <div class="font-bold text-sm text-indigo-950">Theorem &bull; Basic Bounds on Chromatic Number</div>
+              <p class="text-xs sm:text-sm text-slate-700">
+                For a graph $G$ of order $n \ge 1$, $1 \le \chi(G) \le n$. Moreover, $\chi(G) = 1 \iff E(G) = \emptyset$, and $\chi(G) = n \iff G \cong K_n$.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 space-y-1">
+              <div class="font-bold text-sm text-indigo-950">Theorem &amp; Corollary &bull; Bipartite Graphs &amp; Odd Cycles</div>
+              <p class="text-xs sm:text-sm text-slate-700">
+                A nonempty graph $G$ is $2$-colorable ($\chi(G) = 2$ if $E(G) \ne \emptyset$) if and only if $G$ is bipartite, which holds if and only if $G$ contains <strong>no odd cycle</strong>.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 space-y-1">
+              <div class="font-bold text-sm text-indigo-950">Theorem &bull; Degree Bound &amp; Diameter Bound</div>
+              <p class="text-xs sm:text-sm text-slate-700">
+                For every finite simple graph, $\chi(G) \le \Delta(G) + 1$. For a connected graph of order $n$ and diameter $d$, $\chi(G) \le n - d + 1$.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 space-y-1">
+              <div class="font-bold text-sm text-indigo-950">Theorem &bull; Disjoint Union &amp; Join Operations</div>
+              <p class="text-xs sm:text-sm text-slate-700">
+                For pairwise disjoint graphs $G_1, \dots, G_k$, $\chi(G_1 + \dots + G_k) = \max_i \chi(G_i)$. For their join, $\chi(G_1 \vee G_2) = \chi(G_1) + \chi(G_2)$.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 space-y-1">
+              <div class="font-bold text-sm text-indigo-950">Theorem &bull; Clique &amp; Independence Number Bounds</div>
+              <p class="text-xs sm:text-sm text-slate-700">
+                For every graph $G$ of order $n$, $\chi(G) \ge \omega(G)$ and $\frac{n}{\alpha(G)} \le \chi(G) \le n - \alpha(G) + 1$.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-violet-200 bg-violet-50/40 space-y-1">
+              <div class="font-bold text-sm text-violet-950">Theorem &bull; Brooks' Theorem</div>
+              <p class="text-xs sm:text-sm text-slate-700">
+                Let $G$ be a connected graph with maximum degree $\Delta(G)$. If $G$ is neither a complete graph nor an odd cycle, then $\chi(G) \le \Delta(G)$.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.3 VISUALIZATION LAB (SUB-PAGE 3) -->
+      <div id="sub-lab" data-subpage="lab" class="subpage-panel hidden space-y-8">
+
+        <!-- PART A: UPPER INTERACTIVE SANDBOX (UP TO 20 VERTICES) -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-5">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Vertex Coloring &bull; Sub-Page 3: Visualization &amp; Greedy Lab</span>
+              <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">
+                Interactive Vertex Sandbox (Up to 20 Vertices)
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                Load classic presets, add up to 20 vertices, draw Straight, Curved, or Self-Loop edges, and paint vertices to test conflicts in real time.
+              </p>
+            </div>
+
+            <!-- Preset Selector -->
+            <div class="flex items-center gap-2 flex-wrap">
+              <label for="v-preset-select" class="text-xs font-semibold text-slate-600">Preset:</label>
+              <select id="v-preset-select" onchange="loadVertexPreset(this.value)"
+                class="text-xs sm:text-sm font-semibold rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="crown">Crown Graph (Greedy Trap: χ=2, Greedy=3)</option>
+                <option value="c5">Odd Cycle C₅ (χ=3, ω=2)</option>
+                <option value="c6">Even Cycle C₆ (Bipartite, χ=2)</option>
+                <option value="k5">Complete Graph K₅ (χ=5, Δ=4)</option>
+                <option value="exam">Exam Conflict Graph (A–E, χ=3)</option>
+                <option value="join_k2_c5">Join K₂ ∨ C₅ (χ=2+3=5)</option>
+                <option value="petersen">Petersen Graph (χ=3)</option>
+                <option value="blank">Blank Sandbox (Start Fresh)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Tool & Edge Style Controls -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button id="v-tool-move" onclick="setVertexTool('move')"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition">
+                Move / Paint
+              </button>
+              <button id="v-tool-add-vertex" onclick="setVertexTool('add-vertex')"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">
+                + Add Vertex
+              </button>
+              <button id="v-tool-add-edge" onclick="setVertexTool('add-edge')"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">
+                + Draw Edge
+              </button>
+              <button id="v-tool-delete" onclick="setVertexTool('delete')"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-rose-700 border border-rose-200 hover:bg-rose-50 transition">
+                Delete
+              </button>
+            </div>
+
+            <!-- Edge Shape Selector -->
+            <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-slate-200 text-xs">
+              <span class="font-semibold text-slate-500">Edge Style:</span>
+              <button id="v-edge-straight" onclick="setVertexEdgeStyle('straight')"
+                class="px-2 py-1 rounded font-semibold bg-slate-900 text-white">Straight</button>
+              <button id="v-edge-curved" onclick="setVertexEdgeStyle('curved')"
+                class="px-2 py-1 rounded font-semibold text-slate-600 hover:bg-slate-100">Curved</button>
+              <button id="v-edge-loop" onclick="setVertexEdgeStyle('loop')"
+                class="px-2 py-1 rounded font-semibold text-slate-600 hover:bg-slate-100">Self Loop</button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="clearVertexColors()"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 transition">
+                Clear Colors
+              </button>
+              <button onclick="autoColorOptimalVertex()"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition">
+                Apply Optimal χ(G)
+              </button>
+            </div>
+          </div>
+
+          <!-- Edge Selection Helper Banner -->
+          <div id="v-edge-helper" class="hidden rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-2.5 text-xs text-indigo-950 flex items-center justify-between gap-2 flex-wrap">
+            <span id="v-edge-helper-text">Select a start vertex, then click an end vertex (or click a vertex in Self Loop mode).</span>
+            <button onclick="cancelVertexEdgeSelection()" class="font-bold text-indigo-700 hover:underline">Cancel Selection</button>
+          </div>
+
+          <!-- Palette + Metrics Strip -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-semibold text-slate-600">Brush Color:</span>
+              <div id="v-color-palette" class="flex items-center gap-1.5 flex-wrap"></div>
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap text-xs font-mono">
+              <span id="v-stat-nv" class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-800">n=0/20, m=0</span>
+              <span id="v-stat-delta" class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-800">Δ=0</span>
+              <span id="v-stat-chi" class="px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-900 font-bold">χ(G)=?</span>
+              <span id="v-stat-used" class="px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-900">Used=0</span>
+              <span id="v-stat-conflicts" class="px-2.5 py-1 rounded-md bg-rose-100 text-rose-900 font-bold">Conflicts=0</span>
+            </div>
+          </div>
+
+          <!-- Sandbox Canvas -->
+          <div class="relative rounded-2xl border border-slate-200 overflow-hidden canvas-grid">
+            <canvas id="vertex-sandbox-canvas" class="w-full h-[410px] block touch-none"></canvas>
+          </div>
+          <div id="v-color-classes-bar" class="text-xs text-slate-600 flex flex-wrap items-center gap-2"></div>
+        </div>
+
+        <!-- PART B: SIDE-BY-SIDE DEFAULT GREEDY & WELSH-POWELL STUDIO -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-5">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-violet-600">Greedy Heuristic &amp; Dry-Run Simulator</span>
+              <h3 class="text-xl font-extrabold text-slate-900 mt-0.5">
+                Greedy Coloring Simulator (Select Algorithm &amp; Step Through)
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                Choose <strong>Default Greedy Rule</strong> or <strong>Welsh–Powell Algorithm</strong> to view its pseudocode and run a slow, synchronized dry run on the current graph.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-semibold">
+                <button id="vsim-algo-default" onclick="setVertexSimAlgo('default')"
+                  class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition">
+                  Default Greedy Rule
+                </button>
+                <button id="vsim-algo-wp" onclick="setVertexSimAlgo('welsh-powell')"
+                  class="px-3 py-1.5 rounded-lg text-slate-700 hover:bg-white/60 transition">
+                  Welsh–Powell Algorithm
+                </button>
+              </div>
+              <button onclick="stepVertexGreedy(1)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
+                Next Step
+              </button>
+              <button onclick="toggleRunAllVertexGreedy()" id="v-run-all-btn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition">
+                Run All Steps
+              </button>
+              <button onclick="resetVertexGreedySim()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                Reset
+              </button>
+              <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                <span>Speed:</span>
+                <select id="v-sim-speed" onchange="setVertexSimSpeed(this.value)" class="bg-transparent font-mono text-slate-900 focus:outline-none">
+                  <option value="0.5">0.5x</option>
+                  <option value="normal" selected>Normal (1x)</option>
+                  <option value="1">1x</option>
+                  <option value="2">2x</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <!-- Limitation Alert Banner -->
+          <div id="v-limitation-banner" class="rounded-xl px-4 py-3 text-xs sm:text-sm border bg-slate-50 border-slate-200 text-slate-700"></div>
+
+          <!-- Side-by-Side Columns: Left = Active Pseudocode | Right = Synchronized Diagram + Trace -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- Left 6 Cols: Only Selected Algorithm Black Pseudocode Box -->
+            <div class="lg:col-span-6 space-y-4">
+              <div id="v-pseudo-card-default" class="rounded-xl bg-slate-950 text-slate-200 p-4 border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">Default Greedy Rule — Pseudocode</span>
+                  <span class="text-[11px] font-mono text-slate-400">Given Order</span>
+                </div>
+                <pre id="v-pseudo-default" class="text-[11px] sm:text-xs leading-relaxed overflow-x-auto space-y-0.5"><code class="block pseudo-line" data-line="1">1. Take vertices in their given sequence v₁, v₂, ..., vₙ.</code><code class="block pseudo-line" data-line="2">2. Initialize all vertices as uncolored; color pool = {1, 2, ...}.</code><code class="block pseudo-line" data-line="3">3. For each vertex v in the sequence:</code><code class="block pseudo-line" data-line="4">4.   Find colors already assigned to neighbors N(v) of v.</code><code class="block pseudo-line" data-line="5">5.   Assign smallest color c ∉ {colors on N(v)}.</code><code class="block pseudo-line" data-line="6">6. Output coloring c and count total colors used.</code></pre>
+              </div>
+
+              <div id="v-pseudo-card-wp" class="hidden rounded-xl bg-slate-950 text-slate-200 p-4 border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider text-violet-300">Welsh–Powell Algorithm — Pseudocode</span>
+                  <span class="text-[11px] font-mono text-slate-400">Descending Valence</span>
+                </div>
+                <pre id="v-pseudo-wp" class="text-[11px] sm:text-xs leading-relaxed overflow-x-auto space-y-0.5"><code class="block pseudo-line" data-line="1">1. Find the valence (degree) deg(v) for each vertex v ∈ V(G).</code><code class="block pseudo-line" data-line="2">2. List vertices in descending order of valence (break ties arbitrarily).</code><code class="block pseudo-line" data-line="3">3. Color the first uncolored vertex in the list with the next color k.</code><code class="block pseudo-line" data-line="4">4. Scan down the list and assign color k to every uncolored vertex</code><code class="block pseudo-line" data-line="5">   not adjacent to any vertex already colored k; mark colored vertices.</code><code class="block pseudo-line" data-line="6">5. Repeat steps 3–4 with color k ← k + 1 until all vertices are colored.</code></pre>
+              </div>
+            </div>
+
+            <!-- Right 6 Cols: Synchronized Graph Diagram + Order + Dry-Run Step Trace -->
+            <div class="lg:col-span-6 space-y-4">
+              <div class="rounded-xl border border-slate-200 overflow-hidden canvas-grid">
+                <canvas id="vertex-sim-canvas" class="w-full h-[350px] block"></canvas>
+              </div>
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2 text-xs">
+                <div id="v-sim-order-heading" class="font-bold text-slate-800">Vertex Order:</div>
+                <div id="v-sim-order-pills" class="flex flex-wrap gap-1.5"></div>
+                <div id="v-sim-summary-line" class="pt-1 font-mono text-slate-700"></div>
+              </div>
+              <!-- Dry-Run Trace Log -->
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-800">Dry-Run Step Trace</span>
+                  <span id="v-sim-progress" class="text-xs font-mono text-slate-500">Step 0 / 0</span>
+                </div>
+                <div id="v-sim-trace-list" class="max-h-56 overflow-y-auto space-y-1.5 pr-1 text-xs"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 2: EDGE COLORING                                            -->
+    <!-- ===================================================================== -->
+    <section id="section-edge" class="hidden space-y-8">
+
+      <!-- 2.1 MOTIVATION & CONTEXT (SUB-PAGE 1) -->
+      <div id="sub-edge-motivation" data-subpage="motivation" class="subpage-panel space-y-6">
+        <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 sm:p-8 shadow-md">
+          <div class="max-w-4xl">
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 mb-3">
+              Edge Coloring &bull; Sub-Page 1: Motivation &amp; Context
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Why Do We Color Edges? Scheduling Matches &amp; Shared Endpoints
+            </h2>
+            <p class="mt-3 text-slate-200 text-sm sm:text-base leading-relaxed">
+              When the items to schedule or assign channels are <strong>edges</strong> and conflicts happen at <strong>shared endpoints</strong>, vertex coloring is not enough. Here are two concise applications with diagrams showing why <strong>edge coloring</strong> is needed.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Application 1: Round-Robin Tournament -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  Application 01 &bull; Round-Robin Tournament
+                </span>
+                <span class="text-xs font-mono text-slate-500">Team = Vertex &bull; Match = Edge</span>
+              </div>
+
+              <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 text-xs sm:text-sm text-slate-700 space-y-1.5">
+                <p><strong>Question:</strong> Fewest tournament rounds so no team plays twice in the same round?</p>
+                <p><strong>Problem:</strong> Two matches sharing a team cannot run simultaneously; one match per round is slow.</p>
+                <p><strong>Solution:</strong> Represent teams as vertices, matches as edges, and each round as a matching.</p>
+                <p class="text-emerald-700 font-medium"><strong>Why Edge Coloring:</strong> Clashes occur on incident edges sharing a vertex &rarr; minimum rounds = $\chi'(G)$.</p>
+              </div>
+
+              <!-- Visual Diagram: K4 Tournament Matches -> 3 Rounds -->
+              <div class="rounded-xl border border-slate-200 bg-white p-3">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Diagram: K₄ Matches Colored into 3 Rounds</div>
+                <svg viewBox="0 0 420 118" class="w-full h-28 block">
+                  <!-- K4 edges colored by round -->
+                  <line x1="55" y1="26" x2="135" y2="26" stroke="#4f46e5" stroke-width="3" />
+                  <line x1="55" y1="92" x2="135" y2="92" stroke="#4f46e5" stroke-width="3" />
+                  <line x1="55" y1="26" x2="55" y2="92" stroke="#059669" stroke-width="3" />
+                  <line x1="135" y1="26" x2="135" y2="92" stroke="#059669" stroke-width="3" />
+                  <line x1="55" y1="26" x2="135" y2="92" stroke="#d97706" stroke-width="3" />
+                  <line x1="135" y1="26" x2="55" y2="92" stroke="#d97706" stroke-width="3" />
+                  <circle cx="55" cy="26" r="13" fill="#ffffff" stroke="#0f172a" stroke-width="2" /><text x="55" y="30" text-anchor="middle" fill="#0f172a" font-size="11" font-weight="bold">A</text>
+                  <circle cx="135" cy="26" r="13" fill="#ffffff" stroke="#0f172a" stroke-width="2" /><text x="135" y="30" text-anchor="middle" fill="#0f172a" font-size="11" font-weight="bold">B</text>
+                  <circle cx="135" cy="92" r="13" fill="#ffffff" stroke="#0f172a" stroke-width="2" /><text x="135" y="96" text-anchor="middle" fill="#0f172a" font-size="11" font-weight="bold">C</text>
+                  <circle cx="55" cy="92" r="13" fill="#ffffff" stroke="#0f172a" stroke-width="2" /><text x="55" y="96" text-anchor="middle" fill="#0f172a" font-size="11" font-weight="bold">D</text>
+
+                  <text x="172" y="64" fill="#64748b" font-size="16" font-weight="bold">&rArr;</text>
+
+                  <rect x="196" y="16" width="214" height="25" rx="6" fill="#eef2ff" stroke="#c7d2fe" />
+                  <text x="205" y="33" fill="#312e81" font-size="11" font-weight="bold">Round 1 (Indigo): AB, CD</text>
+                  <rect x="196" y="47" width="214" height="25" rx="6" fill="#fffbeb" stroke="#fde68a" />
+                  <text x="205" y="64" fill="#78350f" font-size="11" font-weight="bold">Round 2 (Amber): AC, BD</text>
+                  <rect x="196" y="78" width="214" height="25" rx="6" fill="#ecfdf5" stroke="#a7f3d0" />
+                  <text x="205" y="95" fill="#064e3b" font-size="11" font-weight="bold">Round 3 (Emerald): AD, BC</text>
+                </svg>
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-emerald-100 bg-emerald-50/40 p-3.5 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-950">Try K₄ Match Rounds</span>
+                <button onclick="applyOptimalK4Schedule()" class="text-xs font-semibold text-emerald-700 hover:underline">Reset Optimal</button>
+              </div>
+              <div id="tournament-matches-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+              <div id="tournament-status-box" class="rounded-lg px-3 py-2 text-xs font-semibold border"></div>
+            </div>
+          </div>
+
+          <!-- Application 2: Shared Hub Links & Line Graph L(G) -->
+          <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-teal-50 text-teal-800 border border-teal-200">
+                  Application 02 &bull; Shared Hub Links &amp; Line Graph
+                </span>
+                <span class="text-xs font-mono text-slate-500">$\chi'(G) = \chi(L(G))$</span>
+              </div>
+
+              <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 text-xs sm:text-sm text-slate-700 space-y-1.5">
+                <p><strong>Question:</strong> Distinct channels needed for links sharing a common hub without interference?</p>
+                <p><strong>Problem:</strong> Links meeting at a node clash if given the same channel simultaneously.</p>
+                <p><strong>Solution:</strong> Color edges directly or convert each edge $e$ into a vertex $x_e$ in line graph $L(G)$.</p>
+                <p class="text-emerald-700 font-medium"><strong>Why Edge Coloring:</strong> Models link-incidence directly and unifies with vertex coloring via $\chi'(G) = \chi(L(G))$.</p>
+              </div>
+
+              <!-- Visual Diagram: Star K1,3 -> Line Graph K3 -->
+              <div class="rounded-xl border border-slate-200 bg-white p-3">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Diagram: Star K₁,₃ Edges &rarr; Line Graph L(K₁,₃) ≅ K₃</div>
+                <svg viewBox="0 0 420 118" class="w-full h-28 block">
+                  <!-- Star K1,3 -->
+                  <line x1="85" y1="62" x2="45" y2="26" stroke="#4f46e5" stroke-width="3" />
+                  <line x1="85" y1="62" x2="125" y2="26" stroke="#d97706" stroke-width="3" />
+                  <line x1="85" y1="62" x2="85" y2="102" stroke="#059669" stroke-width="3" />
+                  <text x="55" y="42" fill="#4f46e5" font-size="11" font-weight="bold">e₁</text>
+                  <text x="108" y="42" fill="#d97706" font-size="11" font-weight="bold">e₂</text>
+                  <text x="93" y="86" fill="#059669" font-size="11" font-weight="bold">e₃</text>
+                  <circle cx="85" cy="62" r="12" fill="#ffffff" stroke="#0f172a" stroke-width="2" /><text x="85" y="66" text-anchor="middle" fill="#0f172a" font-size="11" font-weight="bold">u</text>
+
+                  <text x="185" y="64" fill="#64748b" font-size="16" font-weight="bold">&harr;</text>
+
+                  <!-- Line graph K3 -->
+                  <line x1="305" y1="26" x2="272" y2="86" stroke="#64748b" stroke-width="2" />
+                  <line x1="305" y1="26" x2="338" y2="86" stroke="#64748b" stroke-width="2" />
+                  <line x1="272" y1="86" x2="338" y2="86" stroke="#64748b" stroke-width="2" />
+                  <circle cx="305" cy="26" r="13" fill="#4f46e5" /><text x="305" y="30" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">x₁</text>
+                  <circle cx="272" cy="86" r="13" fill="#d97706" /><text x="272" y="90" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">x₂</text>
+                  <circle cx="338" cy="86" r="13" fill="#059669" /><text x="338" y="90" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">x₃</text>
+                  <text x="305" y="111" text-anchor="middle" fill="#334155" font-size="10" font-weight="bold">χ'(K₁,₃) = χ(K₃) = 3</text>
+                </svg>
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-teal-100 bg-teal-50/50 p-3.5 text-xs text-slate-700 space-y-1">
+              <div class="font-bold text-teal-950">Core Bounds at a Glance:</div>
+              <p><strong>König (Bipartite):</strong> $\chi'(G) = \Delta(G)$ &bull; <strong>Vizing (Simple):</strong> $\Delta(G) \le \chi'(G) \le \Delta(G)+1$.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.2 DEFINITIONS & THEOREMS (SUB-PAGE 2) -->
+      <div id="sub-edge-theory" data-subpage="theory" class="subpage-panel hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-2xs space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Edge Coloring &bull; Sub-Page 2: Definitions &amp; Theorems</span>
+            <h2 class="text-2xl font-extrabold text-slate-900 mt-1">Edge Coloring, Line Graphs, Matchings, König &amp; Vizing</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Definition &bull; Proper Edge Coloring &amp; Chromatic Index</span>
+              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                Two distinct edges are <strong>adjacent</strong> if they share an endpoint. A <strong>proper edge coloring</strong> assigns distinct colors to adjacent edges; the minimum colors needed is the <strong>chromatic index</strong> $\chi'(G)$ ($\chi'(G)=0$ if $E(G)=\emptyset$).
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Definition &bull; Line Graph $L(G)$</span>
+              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                The <strong>line graph</strong> $L(G)$ has vertex set $V(L(G)) = \{x_e : e \in E(G)\}$, with $x_e x_f \in E(L(G))$ if and only if edges $e$ and $f$ share a common endpoint in $G$.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Definition &bull; Matching &amp; Matching Number</span>
+              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                A <strong>matching</strong> is a set of pairwise non-adjacent edges (no common endpoints). Its maximum size is the <strong>matching number</strong> $\alpha'(G)$.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Definition &bull; Class 1, Class 2 &amp; Overfull Graphs</span>
+              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                A simple graph is <strong>Class 1</strong> if $\chi'(G)=\Delta(G)$ and <strong>Class 2</strong> if $\chi'(G)=\Delta(G)+1$. A simple graph of order $n$ is <strong>overfull</strong> if $|E(G)| > \lfloor n/2 \rfloor \Delta(G)$.
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <h3 class="text-base font-bold text-slate-900">Key Theorems &amp; Results</h3>
+
+            <div class="p-4 rounded-xl border border-emerald-100 bg-emerald-50/30 space-y-1">
+              <div class="font-bold text-sm text-emerald-950">Theorem &bull; Line Graph Equivalence</div>
+              <p class="text-xs sm:text-sm text-slate-700">For every simple graph $G$, $\chi'(G) = \chi(L(G))$.</p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-emerald-100 bg-emerald-50/30 space-y-1">
+              <div class="font-bold text-sm text-emerald-950">Theorem &bull; Edge Color Classes as Matchings</div>
+              <p class="text-xs sm:text-sm text-slate-700">
+                In every proper edge coloring, each nonempty color class is a matching; conversely, partitioning $E(G)$ into disjoint matchings yields a proper edge coloring.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-emerald-100 bg-emerald-50/30 space-y-1">
+              <div class="font-bold text-sm text-emerald-950">Theorem &bull; Degree &amp; Matching-Number Lower Bounds</div>
+              <p class="text-xs sm:text-sm text-slate-700">
+                For any graph with at least one edge, $\chi'(G) \ge \Delta(G)$ and $\chi'(G) \ge \left\lceil \frac{|E(G)|}{\alpha'(G)} \right\rceil$.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-emerald-100 bg-emerald-50/30 space-y-1">
+              <div class="font-bold text-sm text-emerald-950">Theorem &bull; König's Line Coloring Theorem</div>
+              <p class="text-xs sm:text-sm text-slate-700">If $G$ is a bipartite graph, then $\chi'(G) = \Delta(G)$.</p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-teal-200 bg-teal-50/40 space-y-1">
+              <div class="font-bold text-sm text-teal-950">Theorem &bull; Vizing's Theorem, Overfull Graphs &amp; Hamiltonian Cubic Graphs</div>
+              <p class="text-xs sm:text-sm text-slate-700">
+                For every simple graph $G$, $\Delta(G) \le \chi'(G) \le \Delta(G) + 1$. Every overfull simple graph is of Class 2 (and no even-order simple graph is overfull). Every Hamiltonian cubic graph is of Class 1 ($\chi'(G) = 3$).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.3 VISUALIZATION LAB (SUB-PAGE 3) -->
+      <div id="sub-edge-lab" data-subpage="lab" class="subpage-panel hidden space-y-8">
+
+        <!-- PART A: UPPER EDGE SANDBOX + LINE GRAPH L(G) (UP TO 20 VERTICES) -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-5">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Edge Coloring &bull; Sub-Page 3: Visualization &amp; Greedy Lab</span>
+              <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">
+                Interactive Edge Sandbox &amp; Line Graph Bridge $L(G)$
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                Draw Straight, Curved, or Self-Loop edges (up to 20 vertices), paint edges, and watch the corresponding vertices in $L(G)$ update live.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <label for="e-preset-select" class="text-xs font-semibold text-slate-600">Preset:</label>
+              <select id="e-preset-select" onchange="loadEdgePreset(this.value)"
+                class="text-xs sm:text-sm font-semibold rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="k4">Complete Graph K₄ (Tournament, χ'=3, Δ=3)</option>
+                <option value="c5">Odd Cycle C₅ (χ'=3, Δ=2, Class 2)</option>
+                <option value="c6">Even Cycle C₆ (χ'=2, Δ=2, Class 1)</option>
+                <option value="k5">Complete Graph K₅ (Overfull, χ'=5, Class 2)</option>
+                <option value="star_k13">Star K₁,₃ (L(K₁,₃) ≅ K₃, χ'=3)</option>
+                <option value="prism">Triangular Prism (Hamiltonian Cubic, χ'=3)</option>
+                <option value="k33">Complete Bipartite K₃,₃ (König, χ'=3)</option>
+                <option value="blank">Blank Sandbox (Start Fresh)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Edge Sandbox Controls -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button id="e-tool-move" onclick="setEdgeTool('move')"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition">
+                Move / Paint Edge
+              </button>
+              <button id="e-tool-add-vertex" onclick="setEdgeTool('add-vertex')"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">
+                + Add Vertex
+              </button>
+              <button id="e-tool-add-edge" onclick="setEdgeTool('add-edge')"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition">
+                + Draw Edge
+              </button>
+              <button id="e-tool-delete" onclick="setEdgeTool('delete')"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-rose-700 border border-rose-200 hover:bg-rose-50 transition">
+                Delete
+              </button>
+            </div>
+
+            <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-slate-200 text-xs">
+              <span class="font-semibold text-slate-500">Edge Style:</span>
+              <button id="e-edge-straight" onclick="setEdgeStyle('straight')"
+                class="px-2 py-1 rounded font-semibold bg-slate-900 text-white">Straight</button>
+              <button id="e-edge-curved" onclick="setEdgeStyle('curved')"
+                class="px-2 py-1 rounded font-semibold text-slate-600 hover:bg-slate-100">Curved</button>
+              <button id="e-edge-loop" onclick="setEdgeStyle('loop')"
+                class="px-2 py-1 rounded font-semibold text-slate-600 hover:bg-slate-100">Self Loop</button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="clearEdgeColors()"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 transition">
+                Clear Colors
+              </button>
+              <button onclick="autoColorProperEdges()"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
+                Proper Color Edges
+              </button>
+            </div>
+          </div>
+
+          <div id="e-edge-helper" class="hidden rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-2.5 text-xs text-emerald-950 flex items-center justify-between gap-2 flex-wrap">
+            <span id="e-edge-helper-text">Select a start vertex, then click an end vertex (or click a vertex in Self Loop mode).</span>
+            <button onclick="cancelEdgeSelection()" class="font-bold text-emerald-700 hover:underline">Cancel Selection</button>
+          </div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-semibold text-slate-600">Edge Color:</span>
+              <div id="e-color-palette" class="flex items-center gap-1.5 flex-wrap"></div>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap text-xs font-mono">
+              <span id="e-stat-counts" class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-800">n=0/20, m=0</span>
+              <span id="e-stat-delta" class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-800">Δ=0</span>
+              <span id="e-stat-vizing" class="px-2.5 py-1 rounded-md bg-teal-100 text-teal-900">Vizing=[0..0]</span>
+              <span id="e-stat-chi-prime" class="px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-900 font-bold">χ'(G)=?</span>
+              <span id="e-stat-conflicts" class="px-2.5 py-1 rounded-md bg-rose-100 text-rose-900 font-bold">Clashes=0</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div class="lg:col-span-7 rounded-2xl border border-slate-200 overflow-hidden canvas-grid">
+              <canvas id="edge-sandbox-canvas" class="w-full h-[380px] block touch-none"></canvas>
+            </div>
+            <div class="lg:col-span-5 rounded-2xl border border-slate-200 overflow-hidden canvas-grid">
+              <canvas id="line-graph-canvas" class="w-full h-[380px] block"></canvas>
+            </div>
+          </div>
+          <div id="e-diagnostics-bar" class="text-xs text-slate-600 flex flex-wrap items-center gap-2"></div>
+        </div>
+
+        <!-- PART B: SIDE-BY-SIDE EDGE GREEDY & MATCHING-ORDER STUDIO -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-5">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-teal-600">Edge Coloring Heuristic &amp; Dry-Run Simulator</span>
+              <h3 class="text-xl font-extrabold text-slate-900 mt-0.5">
+                Greedy Edge Coloring Simulator (Select Algorithm &amp; Step Through)
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                Choose <strong>Default Greedy Rule</strong> or <strong>Welsh–Powell Algorithm</strong> (ordered by incident edge degree / line-graph degree) and step slowly through the dry run.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-semibold">
+                <button id="esim-algo-default" onclick="setEdgeSimAlgo('default')"
+                  class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white transition">
+                  Default Greedy Rule
+                </button>
+                <button id="esim-algo-incidence" onclick="setEdgeSimAlgo('incidence')"
+                  class="px-3 py-1.5 rounded-lg text-slate-700 hover:bg-white/60 transition">
+                  Welsh–Powell Algorithm
+                </button>
+              </div>
+              <button onclick="stepEdgeGreedy(1)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
+                Next Step
+              </button>
+              <button onclick="toggleRunAllEdgeGreedy()" id="e-run-all-btn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition">
+                Run All Steps
+              </button>
+              <button onclick="resetEdgeGreedySim()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                Reset
+              </button>
+              <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                <span>Speed:</span>
+                <select id="e-sim-speed" onchange="setEdgeSimSpeed(this.value)" class="bg-transparent font-mono text-slate-900 focus:outline-none">
+                  <option value="0.5">0.5x</option>
+                  <option value="normal" selected>Normal (1x)</option>
+                  <option value="1">1x</option>
+                  <option value="2">2x</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div id="e-limitation-banner" class="rounded-xl px-4 py-3 text-xs sm:text-sm border bg-slate-50 border-slate-200 text-slate-700"></div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div class="lg:col-span-6 space-y-4">
+              <div id="e-pseudo-card-default" class="rounded-xl bg-slate-950 text-slate-200 p-4 border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider text-emerald-300">Default Greedy Rule — Pseudocode</span>
+                  <span class="text-[11px] font-mono text-slate-400">Given Edge Order</span>
+                </div>
+                <pre id="e-pseudo-default" class="text-[11px] sm:text-xs leading-relaxed overflow-x-auto space-y-0.5"><code class="block pseudo-line" data-line="1">1. Take edges in given order e₁, e₂, ..., eₘ.</code><code class="block pseudo-line" data-line="2">2. Mark all edges as uncolored.</code><code class="block pseudo-line" data-line="3">3. For each edge e = uv in sequence:</code><code class="block pseudo-line" data-line="4">4.   Collect colors used on edges incident to u or v.</code><code class="block pseudo-line" data-line="5">5.   Assign smallest color c not used on any incident edge.</code><code class="block pseudo-line" data-line="6">6. Output edge coloring (each color class is a matching).</code></pre>
+              </div>
+
+              <div id="e-pseudo-card-incidence" class="hidden rounded-xl bg-slate-950 text-slate-200 p-4 border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider text-teal-300">Welsh–Powell Algorithm (Edge / L(G)) — Pseudocode</span>
+                  <span class="text-[11px] font-mono text-slate-400">Decreasing Incident Degree</span>
+                </div>
+                <pre id="e-pseudo-incidence" class="text-[11px] sm:text-xs leading-relaxed overflow-x-auto space-y-0.5"><code class="block pseudo-line" data-line="1">1. For each edge e = uv, compute incident weight w(e) = deg(u) + deg(v) - 2.</code><code class="block pseudo-line" data-line="2">2. Sort edges in non-increasing order of w(e) (Welsh–Powell order).</code><code class="block pseudo-line" data-line="3">3. For each edge e in the sorted order:</code><code class="block pseudo-line" data-line="4">4.   Find colors already used on adjacent edges sharing an endpoint.</code><code class="block pseudo-line" data-line="5">5.   Assign smallest available color k ≥ 1.</code><code class="block pseudo-line" data-line="6">6. Output coloring and compare with Vizing bounds [Δ, Δ+1].</code></pre>
+              </div>
+
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-800">Dry-Run Step Trace</span>
+                  <span id="e-sim-progress" class="text-xs font-mono text-slate-500">Step 0 / 0</span>
+                </div>
+                <div id="e-sim-trace-list" class="max-h-56 overflow-y-auto space-y-1.5 pr-1 text-xs"></div>
+              </div>
+            </div>
+
+            <div class="lg:col-span-6 space-y-4">
+              <div class="rounded-xl border border-slate-200 overflow-hidden canvas-grid">
+                <canvas id="edge-sim-canvas" class="w-full h-[350px] block"></canvas>
+              </div>
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2 text-xs">
+                <div id="e-sim-order-heading" class="font-bold text-slate-800">Edge Order:</div>
+                <div id="e-sim-order-pills" class="flex flex-wrap gap-1.5"></div>
+                <div id="e-sim-summary-line" class="pt-1 font-mono text-slate-700"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white py-5 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span>Graph Coloring &amp; Edge Coloring Interactive Study Lab &bull; Surajit Sahoo</span>
+      <span>Supports up to 20 vertices &bull; Straight, Curved &amp; Self-Loop edges</span>
+    </div>
+  </footer>
+
+  <script>
+    const MAX_VERTICES = 20;
+
+    const COLOR_PALETTE = [
+      { id: 1, name: 'Indigo', hex: '#4f46e5', text: '#ffffff' },
+      { id: 2, name: 'Amber', hex: '#d97706', text: '#ffffff' },
+      { id: 3, name: 'Emerald', hex: '#059669', text: '#ffffff' },
+      { id: 4, name: 'Rose', hex: '#e11d48', text: '#ffffff' },
+      { id: 5, name: 'Violet', hex: '#7c3aed', text: '#ffffff' },
+      { id: 6, name: 'Cyan', hex: '#0891b2', text: '#ffffff' },
+      { id: 7, name: 'Lime', hex: '#65a30d', text: '#ffffff' },
+      { id: 8, name: 'Fuchsia', hex: '#c026d3', text: '#ffffff' }
+    ];
+
+    function getColorHex(colorId) {
+      if (!colorId) return '#e2e8f0';
+      const found = COLOR_PALETTE.find(c => c.id === colorId);
+      if (found) return found.hex;
+      const hue = ((colorId * 57) % 360);
+      return `hsl(${hue}, 72%, 48%)`;
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast-banner');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        el.classList.add('hidden');
+      }, 2600);
+    }
+
+    function renderMath() {
+      if (typeof renderMathInElement === 'function') {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    let activeSubPage = 'motivation';
+
+    function updateSubPageTabs() {
+      ['motivation', 'theory', 'lab'].forEach(t => {
+        const btn = document.getElementById(`subtab-${t}`);
+        if (!btn) return;
+        btn.className = t === activeSubPage
+          ? 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition shrink-0'
+          : 'px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 transition shrink-0';
+      });
+      document.querySelectorAll('.subpage-panel').forEach(panel => {
+        panel.classList.toggle('hidden', panel.dataset.subpage !== activeSubPage);
+      });
+    }
+
+    function switchSubPage(subKey) {
+      activeSubPage = subKey;
+      updateSubPageTabs();
+      if (subKey === 'lab') {
+        renderVertexGraph();
+        renderVertexSimGraph();
+        renderEdgeAndLineGraph();
+        renderEdgeSimGraph();
+      }
+      renderMath();
+    }
+
+    function switchMainSection(sec) {
+      const vSec = document.getElementById('section-vertex');
+      const eSec = document.getElementById('section-edge');
+      const vBtn = document.getElementById('nav-vertex');
+      const eBtn = document.getElementById('nav-edge');
+      if (sec === 'vertex') {
+        vSec?.classList.remove('hidden');
+        eSec?.classList.add('hidden');
+        if (vBtn) vBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-indigo-600 text-white shadow-xs';
+        if (eBtn) eBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-white/60';
+        renderVertexGraph();
+        renderVertexSimGraph();
+      } else {
+        eSec?.classList.remove('hidden');
+        vSec?.classList.add('hidden');
+        if (eBtn) eBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-emerald-600 text-white shadow-xs';
+        if (vBtn) vBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-white/60';
+        renderEdgeAndLineGraph();
+        renderEdgeSimGraph();
+      }
+      updateSubPageTabs();
+      renderMath();
+    }
+
+    // =====================================================================
+    // INTERACTIVE MOTIVATION DEMOS
+    // =====================================================================
+    const examCourses = ['A', 'B', 'C', 'D', 'E'];
+    const examConflicts = [['A', 'B'], ['A', 'C'], ['B', 'C'], ['B', 'D'], ['C', 'D'], ['D', 'E']];
+    let examSlots = { A: 1, B: 2, C: 3, D: 1, E: 2 };
+
+    function resetExamDemo() {
+      examSlots = { A: 1, B: 2, C: 3, D: 1, E: 2 };
+      renderExamDemo();
+    }
+
+    function cycleExamSlot(course) {
+      examSlots[course] = (examSlots[course] % 3) + 1;
+      renderExamDemo();
+    }
+
+    function renderExamDemo() {
+      const grid = document.getElementById('exam-courses-grid');
+      const statusBox = document.getElementById('exam-status-box');
+      if (!grid || !statusBox) return;
+
+      const clashes = examConflicts.filter(([u, v]) => examSlots[u] === examSlots[v]);
+      const usedSlots = new Set(Object.values(examSlots));
+
+      grid.innerHTML = examCourses.map(c => {
+        const s = examSlots[c];
+        const hasClash = clashes.some(([u, v]) => u === c || v === c);
+        return `
+          <button onclick="cycleExamSlot('${c}')"
+            class="p-2.5 rounded-xl border text-center transition ${hasClash ? 'border-rose-500 bg-rose-50 text-rose-900' : 'border-indigo-200 bg-white text-slate-900 hover:border-indigo-400'}">
+            <div class="font-bold text-sm">${c}</div>
+            <div class="text-[11px] font-mono mt-0.5">Slot ${s}</div>
+          </button>
+        `;
+      }).join('');
+
+      if (clashes.length > 0) {
+        statusBox.className = 'rounded-lg px-3 py-2 text-xs font-semibold border bg-rose-50 border-rose-200 text-rose-800';
+        statusBox.textContent = `Conflict detected: ${clashes.map(p => p.join('-')).join(', ')} share the same exam slot!`;
+      } else {
+        statusBox.className = 'rounded-lg px-3 py-2 text-xs font-semibold border bg-emerald-50 border-emerald-200 text-emerald-800';
+        statusBox.textContent = `Valid schedule using ${usedSlots.size} time slot(s) (minimum required is χ(G) = 3 due to triangle A-B-C).`;
+      }
+    }
+
+    function setRegisterCase(mode) {
+      const btnP4 = document.getElementById('reg-btn-p4');
+      const btnK3 = document.getElementById('reg-btn-k3');
+      const view = document.getElementById('register-case-view');
+      if (!btnP4 || !btnK3 || !view) return;
+
+      if (mode === 'p4') {
+        btnP4.className = 'px-2.5 py-1 rounded-md bg-violet-600 text-white';
+        btnK3.className = 'px-2.5 py-1 rounded-md text-slate-700 hover:bg-slate-100';
+        view.innerHTML = `
+          <p class="text-slate-700">Variables <span class="font-mono">a, b, c, d</span> with overlapping live pairs <span class="font-mono">ab, bc, cd</span> form path <span class="font-mono">P₄</span>.</p>
+          <div class="grid grid-cols-4 gap-2 text-center font-mono">
+            <div class="p-2 rounded-lg bg-indigo-100 text-indigo-950 font-semibold">a → R₁</div>
+            <div class="p-2 rounded-lg bg-amber-100 text-amber-950 font-semibold">b → R₂</div>
+            <div class="p-2 rounded-lg bg-indigo-100 text-indigo-950 font-semibold">c → R₁</div>
+            <div class="p-2 rounded-lg bg-amber-100 text-amber-950 font-semibold">d → R₂</div>
+          </div>
+          <p class="text-emerald-800 font-semibold">Only 2 registers (χ(P₄) = 2) are needed because 'a' and 'c' do not overlap.</p>
+        `;
+      } else {
+        btnK3.className = 'px-2.5 py-1 rounded-md bg-violet-600 text-white';
+        btnP4.className = 'px-2.5 py-1 rounded-md text-slate-700 hover:bg-slate-100';
+        view.innerHTML = `
+          <p class="text-slate-700">Variables <span class="font-mono">x, y, z</span> all overlap pairwise, forming triangle <span class="font-mono">K₃</span>.</p>
+          <div class="grid grid-cols-3 gap-2 text-center font-mono">
+            <div class="p-2 rounded-lg bg-indigo-100 text-indigo-950 font-semibold">x → R₁</div>
+            <div class="p-2 rounded-lg bg-amber-100 text-amber-950 font-semibold">y → R₂</div>
+            <div class="p-2 rounded-lg bg-emerald-100 text-emerald-950 font-semibold">z → R₃</div>
+          </div>
+          <p class="text-violet-900 font-semibold">All 3 registers (χ(K₃) = 3) are mandatory since every pair interferes.</p>
+        `;
+      }
+    }
+
+    const k4Matches = [
+      { id: 'AB', u: 'A', v: 'B' },
+      { id: 'CD', u: 'C', v: 'D' },
+      { id: 'AC', u: 'A', v: 'C' },
+      { id: 'BD', u: 'B', v: 'D' },
+      { id: 'AD', u: 'A', v: 'D' },
+      { id: 'BC', u: 'B', v: 'C' }
+    ];
+    let k4Rounds = { AB: 1, CD: 1, AC: 2, BD: 2, AD: 3, BC: 3 };
+
+    function applyOptimalK4Schedule() {
+      k4Rounds = { AB: 1, CD: 1, AC: 2, BD: 2, AD: 3, BC: 3 };
+      renderTournamentDemo();
+    }
+
+    function cycleK4Round(matchId) {
+      k4Rounds[matchId] = (k4Rounds[matchId] % 3) + 1;
+      renderTournamentDemo();
+    }
+
+    function renderTournamentDemo() {
+      const grid = document.getElementById('tournament-matches-grid');
+      const box = document.getElementById('tournament-status-box');
+      if (!grid || !box) return;
+
+      const clashingIds = new Set();
+      const clashNotes = [];
+      for (let i = 0; i < k4Matches.length; i++) {
+        for (let j = i + 1; j < k4Matches.length; j++) {
+          const m1 = k4Matches[i];
+          const m2 = k4Matches[j];
+          if (k4Rounds[m1.id] === k4Rounds[m2.id]) {
+            const shared = [m1.u, m1.v].filter(t => t === m2.u || t === m2.v);
+            if (shared.length > 0) {
+              clashingIds.add(m1.id);
+              clashingIds.add(m2.id);
+              clashNotes.push(`${m1.id} & ${m2.id} (Team ${shared[0]} in Round ${k4Rounds[m1.id]})`);
+            }
+          }
+        }
+      }
+
+      grid.innerHTML = k4Matches.map(m => {
+        const r = k4Rounds[m.id];
+        const bad = clashingIds.has(m.id);
+        return `
+          <button onclick="cycleK4Round('${m.id}')"
+            class="p-2 rounded-xl border text-center transition ${bad ? 'border-rose-500 bg-rose-50 text-rose-900' : 'border-emerald-200 bg-white text-slate-900 hover:border-emerald-400'}">
+            <div class="font-bold text-xs font-mono">${m.u} vs ${m.v}</div>
+            <div class="text-[11px] text-slate-600 mt-0.5">Round ${r}</div>
+          </button>
+        `;
+      }).join('');
+
+      if (clashNotes.length > 0) {
+        box.className = 'rounded-lg px-3 py-2 text-xs font-semibold border bg-rose-50 border-rose-200 text-rose-800';
+        box.textContent = `Team clash: ${clashNotes[0]}`;
+      } else {
+        const usedRounds = new Set(Object.values(k4Rounds)).size;
+        box.className = 'rounded-lg px-3 py-2 text-xs font-semibold border bg-emerald-50 border-emerald-200 text-emerald-800';
+        box.textContent = `Valid schedule in ${usedRounds} round(s) (χ'(K₄) = 3 = Δ(K₄), Class 1).`;
+      }
+    }
+
+    // =====================================================================
+    // GRAPH GEOMETRY & ALGORITHMIC HELPERS
+    // =====================================================================
+    function createEdgeObj(u, v, style = 'straight', color = null) {
+      const baseCurve = style === 'curved' ? 38 : (style === 'loop' ? 0 : 0);
+      return { u, v, style, curveOffset: baseCurve, color };
+    }
+
+    function getEdgeControlPoint(e, p1, p2) {
+      if (e.u === e.v || e.style === 'loop') {
+        return { x: p1.x, y: p1.y - 54 };
+      }
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const nx = -dy / len;
+      const ny = dx / len;
+      const offset = e.curveOffset || (e.style === 'curved' ? 36 : 0);
+      return {
+        x: (p1.x + p2.x) / 2 + nx * offset,
+        y: (p1.y + p2.y) / 2 + ny * offset
+      };
+    }
+
+    function pointToEdgeDistance(px, py, e, vertices) {
+      const p1 = vertices.find(v => v.id === e.u);
+      const p2 = vertices.find(v => v.id === e.v);
+      if (!p1 || !p2) return Infinity;
+      if (e.u === e.v || e.style === 'loop') {
+        const loopCenterY = p1.y - 36;
+        const distToCenter = Math.hypot(px - p1.x, py - loopCenterY);
+        return Math.abs(distToCenter - 20);
+      }
+      const cp = getEdgeControlPoint(e, p1, p2);
+      const hasCurve = Math.abs(cp.x - (p1.x + p2.x) / 2) > 0.5 || Math.abs(cp.y - (p1.y + p2.y) / 2) > 0.5;
+      if (!hasCurve) {
+        const vx = p2.x - p1.x;
+        const vy = p2.y - p1.y;
+        const l2 = vx * vx + vy * vy;
+        if (l2 === 0) return Math.hypot(px - p1.x, py - p1.y);
+        const t = Math.max(0, Math.min(1, ((px - p1.x) * vx + (py - p1.y) * vy) / l2));
+        return Math.hypot(px - (p1.x + t * vx), py - (p1.y + t * vy));
+      }
+      let minD = Infinity;
+      for (let i = 0; i <= 24; i++) {
+        const t = i / 24;
+        const inv = 1 - t;
+        const bx = inv * inv * p1.x + 2 * inv * t * cp.x + t * t * p2.x;
+        const by = inv * inv * p1.y + 2 * inv * t * cp.y + t * t * p2.y;
+        minD = Math.min(minD, Math.hypot(px - bx, py - by));
+      }
+      return minD;
+    }
+
+    function drawSingleEdge(ctx, e, vertices, opts = {}) {
+      const p1 = vertices.find(v => v.id === e.u);
+      const p2 = vertices.find(v => v.id === e.v);
+      if (!p1 || !p2) return;
+
+      ctx.save();
+      ctx.lineWidth = opts.width || 2.5;
+      ctx.strokeStyle = opts.strokeStyle || (e.color ? getColorHex(e.color) : '#64748b');
+      if (opts.dash) ctx.setLineDash(opts.dash);
+
+      if (e.u === e.v || e.style === 'loop') {
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y - 34, 18, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        const cp = getEdgeControlPoint(e, p1, p2);
+        const hasCurve = Math.abs(cp.x - (p1.x + p2.x) / 2) > 0.5 || Math.abs(cp.y - (p1.y + p2.y) / 2) > 0.5;
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        if (hasCurve) {
+          ctx.quadraticCurveTo(cp.x, cp.y, p2.x, p2.y);
+        } else {
+          ctx.lineTo(p2.x, p2.y);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawVertexNode(ctx, v, opts = {}) {
+      const r = opts.radius || 20;
+      const fill = opts.fill || (v.color ? getColorHex(v.color) : '#ffffff');
+      const isDarkFill = Boolean(v.color) || Boolean(opts.darkFill);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(v.x, v.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = fill;
+      ctx.fill();
+
+      ctx.lineWidth = opts.ringWidth || 2.5;
+      ctx.strokeStyle = opts.ringColor || '#0f172a';
+      ctx.stroke();
+
+      ctx.fillStyle = isDarkFill ? '#ffffff' : '#0f172a';
+      ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(v.label || `v${v.id}`, v.x, v.y);
+      ctx.restore();
+    }
+
+    function computeExactChromaticNumber(vertices, edges) {
+      const n = vertices.length;
+      if (n === 0) return 0;
+      if (edges.length === 0) return 1;
+
+      const idxMap = new Map(vertices.map((v, idx) => [v.id, idx]));
+      const adj = Array.from({ length: n }, () => new Set());
+      edges.forEach(e => {
+        const i = idxMap.get(e.u);
+        const j = idxMap.get(e.v);
+        if (i !== undefined && j !== undefined) {
+          if (i === j) {
+            adj[i].add(i);
+          } else {
+            adj[i].add(j);
+            adj[j].add(i);
+          }
+        }
+      });
+
+      const colors = Array(n).fill(0);
+      function canColor(u, c) {
+        if (adj[u].has(u)) return false;
+        for (const nb of adj[u]) {
+          if (colors[nb] === c) return false;
+        }
+        return true;
+      }
+
+      function backtrack(u, maxC) {
+        if (u === n) return true;
+        for (let c = 1; c <= maxC; c++) {
+          if (canColor(u, c)) {
+            colors[u] = c;
+            if (backtrack(u + 1, maxC)) return true;
+            colors[u] = 0;
+          }
+        }
+        return false;
+      }
+
+      const maxCheck = Math.min(n, 10);
+      for (let k = 1; k <= maxCheck; k++) {
+        colors.fill(0);
+        if (backtrack(0, k)) return k;
+      }
+      return maxCheck;
+    }
+
+    // =====================================================================
+    // VERTEX COLORING SANDBOX & SIDE-BY-SIDE GREEDY STUDIO
+    // =====================================================================
+    const vState = {
+      vertices: [],
+      edges: [],
+      tool: 'move',
+      edgeStyle: 'straight',
+      brushColor: 1,
+      selectedStartId: null,
+      draggingVertexId: null,
+      hoverVertexId: null,
+      pointerPos: null,
+      simAlgo: 'default',
+      simStepIndex: 0,
+      simSpeed: 'normal',
+      simTimer: null
+    };
+
+    function getDelayMs(speedVal) {
+      if (speedVal === '0.5') return 2000;
+      if (speedVal === '2') return 500;
+      return 1150;
+    }
+
+    function stopVertexAutoRun() {
+      if (vState.simTimer) {
+        clearInterval(vState.simTimer);
+        vState.simTimer = null;
+      }
+      const btn = document.getElementById('v-run-all-btn');
+      if (btn) btn.textContent = 'Run All Steps';
+    }
+
+    function setVertexSimSpeed(val) {
+      vState.simSpeed = val;
+      if (vState.simTimer) {
+        stopVertexAutoRun();
+        toggleRunAllVertexGreedy();
+      }
+    }
+
+    function toggleRunAllVertexGreedy() {
+      if (vState.simTimer) {
+        stopVertexAutoRun();
+        return;
+      }
+      const { steps } = computeVertexGreedySteps();
+      if (steps.length === 0) return;
+      if (vState.simStepIndex >= steps.length) {
+        vState.simStepIndex = 0;
+        updateVertexGreedyUI();
+      }
+      const btn = document.getElementById('v-run-all-btn');
+      if (btn) btn.textContent = 'Pause';
+
+      vState.simTimer = setInterval(() => {
+        const current = computeVertexGreedySteps();
+        if (vState.simStepIndex >= current.steps.length) {
+          stopVertexAutoRun();
+          return;
+        }
+        vState.simStepIndex++;
+        updateVertexGreedyUI();
+        if (vState.simStepIndex >= current.steps.length) {
+          stopVertexAutoRun();
+        }
+      }, getDelayMs(vState.simSpeed));
+    }
+
+    function initVertexPalette() {
+      const wrap = document.getElementById('v-color-palette');
+      if (!wrap) return;
+      wrap.innerHTML = COLOR_PALETTE.map(col => `
+        <button onclick="setVertexBrushColor(${col.id})" title="${col.name}"
+          class="w-7 h-7 rounded-full border-2 transition flex items-center justify-center text-[11px] font-bold ${vState.brushColor === col.id ? 'border-slate-950 scale-110 shadow-xs' : 'border-white shadow-2xs'}"
+          style="background-color:${col.hex}; color:${col.text}">
+          ${col.id}
+        </button>
+      `).join('');
+    }
+
+    function setVertexBrushColor(id) {
+      vState.brushColor = id;
+      vState.tool = 'move';
+      updateVertexToolButtons();
+      initVertexPalette();
+    }
+
+    function setVertexTool(tool) {
+      vState.tool = tool;
+      vState.selectedStartId = null;
+      updateVertexToolButtons();
+      updateVertexEdgeHelper();
+      renderVertexGraph();
+    }
+
+    function setVertexEdgeStyle(style) {
+      vState.edgeStyle = style;
+      ['straight', 'curved', 'loop'].forEach(s => {
+        const btn = document.getElementById(`v-edge-${s}`);
+        if (!btn) return;
+        btn.className = s === style
+          ? 'px-2 py-1 rounded font-semibold bg-slate-900 text-white'
+          : 'px-2 py-1 rounded font-semibold text-slate-600 hover:bg-slate-100';
+      });
+      updateVertexEdgeHelper();
+    }
+
+    function updateVertexToolButtons() {
+      const tools = ['move', 'add-vertex', 'add-edge', 'delete'];
+      tools.forEach(t => {
+        const btn = document.getElementById(`v-tool-${t}`);
+        if (!btn) return;
+        if (t === 'delete') {
+          btn.className = vState.tool === t
+            ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 text-white transition'
+            : 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-rose-700 border border-rose-200 hover:bg-rose-50 transition';
+        } else {
+          btn.className = vState.tool === t
+            ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition'
+            : 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition';
+        }
+      });
+    }
+
+    function updateVertexEdgeHelper() {
+      const banner = document.getElementById('v-edge-helper');
+      const txt = document.getElementById('v-edge-helper-text');
+      if (!banner || !txt) return;
+      if (vState.tool !== 'add-edge') {
+        banner.classList.add('hidden');
+        return;
+      }
+      banner.classList.remove('hidden');
+      if (vState.edgeStyle === 'loop') {
+        txt.textContent = 'Self-Loop mode active: click any vertex to create a self-loop.';
+      } else if (vState.selectedStartId !== null) {
+        const sv = vState.vertices.find(v => v.id === vState.selectedStartId);
+        txt.textContent = `Start vertex "${sv ? sv.label : vState.selectedStartId}" selected — now click an end vertex to draw the ${vState.edgeStyle} edge.`;
+      } else {
+        txt.textContent = `Click a start vertex, then click an end vertex to draw a ${vState.edgeStyle} edge.`;
+      }
+    }
+
+    function cancelVertexEdgeSelection() {
+      vState.selectedStartId = null;
+      updateVertexEdgeHelper();
+      renderVertexGraph();
+    }
+
+    function clearVertexColors() {
+      vState.vertices.forEach(v => { v.color = null; });
+      renderVertexGraph();
+    }
+
+    function autoColorOptimalVertex() {
+      const n = vState.vertices.length;
+      if (n === 0) return;
+      const order = [...vState.vertices].sort((a, b) => a.id - b.id);
+      vState.vertices.forEach(v => { v.color = null; });
+      order.forEach(v => {
+        const used = new Set();
+        vState.edges.forEach(e => {
+          if (e.u === v.id && e.v !== v.id) {
+            const nb = vState.vertices.find(x => x.id === e.v);
+            if (nb && nb.color) used.add(nb.color);
+          } else if (e.v === v.id && e.u !== v.id) {
+            const nb = vState.vertices.find(x => x.id === e.u);
+            if (nb && nb.color) used.add(nb.color);
+          } else if (e.u === v.id && e.v === v.id) {
+            used.add(v.color);
+          }
+        });
+        let c = 1;
+        while (used.has(c)) c++;
+        v.color = c;
+      });
+      renderVertexGraph();
+      showToast('Applied proper greedy vertex coloring to sandbox.');
+    }
+
+    function loadVertexPreset(preset) {
+      const canvas = document.getElementById('vertex-sandbox-canvas');
+      const w = canvas ? canvas.clientWidth || 680 : 680;
+      const h = 410;
+      const cx = w / 2;
+      const cy = h / 2;
+
+      vState.vertices = [];
+      vState.edges = [];
+      vState.selectedStartId = null;
+
+      if (preset === 'crown') {
+        const labels = ['a₁', 'a₂', 'a₃', 'b₁', 'b₂', 'b₃'];
+        labels.forEach((lbl, idx) => {
+          const isA = idx < 3;
+          vState.vertices.push({
+            id: idx + 1,
+            label: lbl,
+            x: isA ? cx - 125 : cx + 125,
+            y: 95 + (idx % 3) * 105,
+            color: null
+          });
+        });
+        for (let i = 0; i < 3; i++) {
+          for (let j = 3; j < 6; j++) {
+            if (j - 3 !== i) {
+              vState.edges.push(createEdgeObj(i + 1, j + 1, 'straight'));
+            }
+          }
+        }
+      } else if (preset === 'c5' || preset === 'c6') {
+        const count = preset === 'c5' ? 5 : 6;
+        for (let i = 0; i < count; i++) {
+          const ang = (i * 2 * Math.PI) / count - Math.PI / 2;
+          vState.vertices.push({
+            id: i + 1,
+            label: `v${i + 1}`,
+            x: cx + Math.cos(ang) * 125,
+            y: cy + Math.sin(ang) * 125,
+            color: null
+          });
+          vState.edges.push(createEdgeObj(i + 1, ((i + 1) % count) + 1, 'straight'));
+        }
+      } else if (preset === 'k5') {
+        for (let i = 0; i < 5; i++) {
+          const ang = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+          vState.vertices.push({
+            id: i + 1,
+            label: `v${i + 1}`,
+            x: cx + Math.cos(ang) * 130,
+            y: cy + Math.sin(ang) * 130,
+            color: null
+          });
+        }
+        for (let i = 1; i <= 5; i++) {
+          for (let j = i + 1; j <= 5; j++) {
+            vState.edges.push(createEdgeObj(i, j, 'straight'));
+          }
+        }
+      } else if (preset === 'exam') {
+        const coords = [
+          { lbl: 'A', x: cx - 150, y: cy - 85 },
+          { lbl: 'B', x: cx - 25, y: cy - 115 },
+          { lbl: 'C', x: cx - 95, y: cy + 100 },
+          { lbl: 'D', x: cx + 115, y: cy - 45 },
+          { lbl: 'E', x: cx + 195, y: cy + 85 }
+        ];
+        coords.forEach((p, i) => vState.vertices.push({ id: i + 1, label: p.lbl, x: p.x, y: p.y, color: null }));
+        [[1, 2], [1, 3], [2, 3], [2, 4], [3, 4], [4, 5]].forEach(([u, v]) => {
+          vState.edges.push(createEdgeObj(u, v, 'straight'));
+        });
+      } else if (preset === 'join_k2_c5') {
+        vState.vertices.push({ id: 1, label: 'a₁', x: cx - 180, y: cy - 75, color: null });
+        vState.vertices.push({ id: 2, label: 'a₂', x: cx - 180, y: cy + 85, color: null });
+        vState.edges.push(createEdgeObj(1, 2, 'straight'));
+        for (let i = 0; i < 5; i++) {
+          const ang = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+          const vid = i + 3;
+          vState.vertices.push({
+            id: vid,
+            label: `b${i + 1}`,
+            x: cx + 70 + Math.cos(ang) * 105,
+            y: cy + Math.sin(ang) * 105,
+            color: null
+          });
+          vState.edges.push(createEdgeObj(vid, ((i + 1) % 5) + 3, 'straight'));
+          vState.edges.push(createEdgeObj(1, vid, 'straight'));
+          vState.edges.push(createEdgeObj(2, vid, 'straight'));
+        }
+      } else if (preset === 'petersen') {
+        for (let i = 0; i < 5; i++) {
+          const ang = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+          vState.vertices.push({
+            id: i + 1,
+            label: `u${i + 1}`,
+            x: cx + Math.cos(ang) * 145,
+            y: cy + Math.sin(ang) * 145,
+            color: null
+          });
+          vState.vertices.push({
+            id: i + 6,
+            label: `w${i + 1}`,
+            x: cx + Math.cos(ang) * 70,
+            y: cy + Math.sin(ang) * 70,
+            color: null
+          });
+        }
+        for (let i = 0; i < 5; i++) {
+          vState.edges.push(createEdgeObj(i + 1, ((i + 1) % 5) + 1, 'straight'));
+          vState.edges.push(createEdgeObj(i + 1, i + 6, 'straight'));
+          vState.edges.push(createEdgeObj(i + 6, ((i + 2) % 5) + 6, 'straight'));
+        }
+      }
+
+      vState.simStepIndex = 0;
+      updateVertexEdgeHelper();
+      renderVertexGraph();
+      resetVertexGreedySim();
+    }
+
+    function renderVertexGraph() {
+      const canvas = document.getElementById('vertex-sandbox-canvas');
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width || 680;
+      const height = 410;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+
+      const vMap = new Map(vState.vertices.map(v => [v.id, v]));
+      const conflictEdges = new Set();
+      const conflictVerts = new Set();
+
+      vState.edges.forEach((e, idx) => {
+        const u = vMap.get(e.u);
+        const v = vMap.get(e.v);
+        if (!u || !v) return;
+        if (e.u === e.v && u.color) {
+          conflictEdges.add(idx);
+          conflictVerts.add(u.id);
+        } else if (u.color && v.color && u.color === v.color) {
+          conflictEdges.add(idx);
+          conflictVerts.add(u.id);
+          conflictVerts.add(v.id);
+        }
+      });
+
+      if (vState.tool === 'add-edge' && vState.selectedStartId !== null && vState.pointerPos && vState.edgeStyle !== 'loop') {
+        const sv = vMap.get(vState.selectedStartId);
+        if (sv) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(sv.x, sv.y);
+          ctx.lineTo(vState.pointerPos.x, vState.pointerPos.y);
+          ctx.strokeStyle = '#6366f1';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([6, 4]);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      vState.edges.forEach((e, idx) => {
+        const isConf = conflictEdges.has(idx);
+        drawSingleEdge(ctx, e, vState.vertices, {
+          width: isConf ? 3.5 : 2.2,
+          strokeStyle: isConf ? '#e11d48' : (e.color ? getColorHex(e.color) : '#64748b')
+        });
+      });
+
+      vState.vertices.forEach(v => {
+        const isSel = vState.selectedStartId === v.id;
+        const isConf = conflictVerts.has(v.id);
+        drawVertexNode(ctx, v, {
+          radius: 20,
+          ringWidth: isSel || isConf ? 3.5 : 2.2,
+          ringColor: isSel ? '#4f46e5' : (isConf ? '#e11d48' : '#0f172a')
+        });
+      });
+
+      ctx.restore();
+
+      const n = vState.vertices.length;
+      const m = vState.edges.length;
+      const degs = vState.vertices.map(v => {
+        let d = 0;
+        vState.edges.forEach(e => {
+          if (e.u === e.v && e.u === v.id) d += 2;
+          else if (e.u === v.id || e.v === v.id) d += 1;
+        });
+        return d;
+      });
+      const delta = degs.length ? Math.max(...degs) : 0;
+      const chi = computeExactChromaticNumber(vState.vertices, vState.edges);
+      const usedColors = new Set(vState.vertices.map(v => v.color).filter(Boolean)).size;
+
+      document.getElementById('v-stat-nv').textContent = `n=${n}/${MAX_VERTICES}, m=${m}`;
+      document.getElementById('v-stat-delta').textContent = `Δ=${delta}`;
+      document.getElementById('v-stat-chi').textContent = n === 0 ? 'χ(G)=0' : `χ(G)=${chi}`;
+      document.getElementById('v-stat-used').textContent = `Used=${usedColors}`;
+      document.getElementById('v-stat-conflicts').textContent = `Conflicts=${conflictEdges.size}`;
+
+      const classesBar = document.getElementById('v-color-classes-bar');
+      if (classesBar) {
+        const byColor = new Map();
+        vState.vertices.forEach(v => {
+          if (v.color) {
+            if (!byColor.has(v.color)) byColor.set(v.color, []);
+            byColor.get(v.color).push(v.label);
+          }
+        });
+        if (byColor.size === 0) {
+          classesBar.innerHTML = '<span>Color classes: none colored yet. Click a vertex in Move/Paint mode to color it.</span>';
+        } else {
+          classesBar.innerHTML = '<span class="font-semibold text-slate-700">Color classes:</span>' +
+            [...byColor.entries()].sort((a, b) => a[0] - b[0]).map(([cId, list]) => `
+              <span class="px-2.5 py-0.5 rounded-full text-white font-mono text-[11px]" style="background:${getColorHex(cId)}">
+                C${cId}: {${list.join(', ')}}
+              </span>
+            `).join('');
+        }
+      }
+    }
+
+    function bindVertexCanvasEvents() {
+      const canvas = document.getElementById('vertex-sandbox-canvas');
+      if (!canvas) return;
+
+      function getPos(evt) {
+        const rect = canvas.getBoundingClientRect();
+        return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+      }
+
+      function findVertexAt(x, y) {
+        for (let i = vState.vertices.length - 1; i >= 0; i--) {
+          const v = vState.vertices[i];
+          if (Math.hypot(x - v.x, y - v.y) <= 23) return v;
+        }
+        return null;
+      }
+
+      function findEdgeAt(x, y) {
+        for (let i = vState.edges.length - 1; i >= 0; i--) {
+          if (pointToEdgeDistance(x, y, vState.edges[i], vState.vertices) <= 8) return i;
+        }
+        return -1;
+      }
+
+      canvas.addEventListener('pointerdown', evt => {
+        const pos = getPos(evt);
+        const hitV = findVertexAt(pos.x, pos.y);
+
+        if (vState.tool === 'add-vertex') {
+          if (vState.vertices.length >= MAX_VERTICES) {
+            showToast(`Maximum ${MAX_VERTICES} vertices reached.`);
+            return;
+          }
+          const nextNum = vState.vertices.length + 1;
+          vState.vertices.push({
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            label: `v${nextNum}`,
+            x: Math.max(28, Math.min(pos.x, (canvas.clientWidth || 680) - 28)),
+            y: Math.max(28, Math.min(pos.y, 382)),
+            color: null
+          });
+          renderVertexGraph();
+          resetVertexGreedySim();
+          return;
+        }
+
+        if (vState.tool === 'add-edge') {
+          if (!hitV) return;
+          if (vState.edgeStyle === 'loop') {
+            vState.edges.push(createEdgeObj(hitV.id, hitV.id, 'loop'));
+            renderVertexGraph();
+            resetVertexGreedySim();
+            showToast(`Added self-loop on ${hitV.label}.`);
+            return;
+          }
+          if (vState.selectedStartId === null) {
+            vState.selectedStartId = hitV.id;
+            updateVertexEdgeHelper();
+            renderVertexGraph();
+          } else {
+            const startId = vState.selectedStartId;
+            const endId = hitV.id;
+            vState.selectedStartId = null;
+            updateVertexEdgeHelper();
+            if (startId === endId) {
+              showToast('Choose a different end vertex or switch Edge Style to Self Loop.');
+              renderVertexGraph();
+              return;
+            }
+            const exists = vState.edges.some(e => (e.u === startId && e.v === endId) || (e.u === endId && e.v === startId));
+            if (exists) {
+              showToast('Edge between these two vertices already exists.');
+              renderVertexGraph();
+              return;
+            }
+            vState.edges.push(createEdgeObj(startId, endId, vState.edgeStyle));
+            renderVertexGraph();
+            resetVertexGreedySim();
+          }
+          return;
+        }
+
+        if (vState.tool === 'delete') {
+          if (hitV) {
+            vState.vertices = vState.vertices.filter(v => v.id !== hitV.id);
+            vState.edges = vState.edges.filter(e => e.u !== hitV.id && e.v !== hitV.id);
+            renderVertexGraph();
+            resetVertexGreedySim();
+            return;
+          }
+          const eIdx = findEdgeAt(pos.x, pos.y);
+          if (eIdx !== -1) {
+            vState.edges.splice(eIdx, 1);
+            renderVertexGraph();
+            resetVertexGreedySim();
+          }
+          return;
+        }
+
+        if (vState.tool === 'move') {
+          if (hitV) {
+            hitV.color = hitV.color === vState.brushColor ? null : vState.brushColor;
+            vState.draggingVertexId = hitV.id;
+            canvas.setPointerCapture(evt.pointerId);
+            renderVertexGraph();
+          }
+        }
+      });
+
+      canvas.addEventListener('pointermove', evt => {
+        const pos = getPos(evt);
+        vState.pointerPos = pos;
+        if (vState.draggingVertexId !== null && vState.tool === 'move') {
+          const v = vState.vertices.find(item => item.id === vState.draggingVertexId);
+          if (v) {
+            v.x = Math.max(24, Math.min(pos.x, (canvas.clientWidth || 680) - 24));
+            v.y = Math.max(24, Math.min(pos.y, 386));
+            renderVertexGraph();
+          }
+        } else if (vState.tool === 'add-edge' && vState.selectedStartId !== null) {
+          renderVertexGraph();
+        }
+      });
+
+      canvas.addEventListener('pointerup', evt => {
+        if (vState.draggingVertexId !== null) {
+          vState.draggingVertexId = null;
+          try { canvas.releasePointerCapture(evt.pointerId); } catch (e) {}
+        }
+      });
+    }
+
+    function setVertexSimAlgo(algo) {
+      stopVertexAutoRun();
+      vState.simAlgo = algo;
+      document.getElementById('vsim-algo-default').className = algo === 'default'
+        ? 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition'
+        : 'px-3 py-1.5 rounded-lg text-slate-700 hover:bg-white/60 transition';
+      document.getElementById('vsim-algo-wp').className = algo === 'welsh-powell'
+        ? 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white transition'
+        : 'px-3 py-1.5 rounded-lg text-slate-700 hover:bg-white/60 transition';
+      document.getElementById('v-pseudo-card-default').classList.toggle('hidden', algo !== 'default');
+      document.getElementById('v-pseudo-card-wp').classList.toggle('hidden', algo !== 'welsh-powell');
+      resetVertexGreedySim();
+    }
+
+    function getVertexOrder(algo) {
+      const degMap = new Map(vState.vertices.map(v => [v.id, 0]));
+      vState.edges.forEach(e => {
+        if (e.u === e.v) degMap.set(e.u, (degMap.get(e.u) || 0) + 2);
+        else {
+          degMap.set(e.u, (degMap.get(e.u) || 0) + 1);
+          degMap.set(e.v, (degMap.get(e.v) || 0) + 1);
+        }
+      });
+      const list = [...vState.vertices];
+      if (algo === 'welsh-powell') {
+        list.sort((a, b) => (degMap.get(b.id) - degMap.get(a.id)) || (a.id - b.id));
+      }
+      return { list, degMap };
+    }
+
+    function computeVertexGreedySteps() {
+      const { list, degMap } = getVertexOrder(vState.simAlgo);
+      const assigned = new Map();
+      const steps = [];
+
+      list.forEach((v, idx) => {
+        const neighborIds = new Set();
+        vState.edges.forEach(e => {
+          if (e.u === v.id) neighborIds.add(e.v);
+          if (e.v === v.id) neighborIds.add(e.u);
+        });
+        const forbidden = new Set();
+        neighborIds.forEach(nbId => {
+          if (assigned.has(nbId)) forbidden.add(assigned.get(nbId));
+        });
+        let chosen = 1;
+        while (forbidden.has(chosen)) chosen++;
+        assigned.set(v.id, chosen);
+        steps.push({
+          step: idx + 1,
+          vertexId: v.id,
+          label: v.label,
+          deg: degMap.get(v.id) || 0,
+          forbidden: [...forbidden].sort((a, b) => a - b),
+          color: chosen,
+          line: vState.simAlgo === 'welsh-powell' ? 5 : 5
+        });
+      });
+      return { list, degMap, steps };
+    }
+
+    function resetVertexGreedySim() {
+      stopVertexAutoRun();
+      vState.simStepIndex = 0;
+      updateVertexGreedyUI();
+    }
+
+    function stepVertexGreedy(delta) {
+      stopVertexAutoRun();
+      const { steps } = computeVertexGreedySteps();
+      vState.simStepIndex = Math.max(0, Math.min(steps.length, vState.simStepIndex + delta));
+      updateVertexGreedyUI();
+    }
+
+    function updateVertexGreedyUI() {
+      const { list, degMap, steps } = computeVertexGreedySteps();
+      const activeIdx = Math.min(vState.simStepIndex, steps.length);
+      const currentStep = activeIdx > 0 ? steps[activeIdx - 1] : null;
+
+      document.querySelectorAll('#v-pseudo-default .pseudo-line').forEach(el => {
+        el.classList.remove('pseudo-active');
+        if (vState.simAlgo === 'default') {
+          const lineNum = Number(el.dataset.line);
+          if (!currentStep && lineNum === 1) el.classList.add('pseudo-active');
+          else if (currentStep && activeIdx < steps.length && (lineNum === 3 || lineNum === 5)) el.classList.add('pseudo-active');
+          else if (currentStep && activeIdx === steps.length && lineNum === 6) el.classList.add('pseudo-active');
+        }
+      });
+
+      document.querySelectorAll('#v-pseudo-wp .pseudo-line').forEach(el => {
+        el.classList.remove('pseudo-active');
+        if (vState.simAlgo === 'welsh-powell') {
+          const lineNum = Number(el.dataset.line);
+          if (!currentStep && lineNum === 2) el.classList.add('pseudo-active');
+          else if (currentStep && activeIdx < steps.length && (lineNum === 3 || lineNum === 5)) el.classList.add('pseudo-active');
+          else if (currentStep && activeIdx === steps.length && lineNum === 6) el.classList.add('pseudo-active');
+        }
+      });
+
+      document.getElementById('v-sim-progress').textContent = `Step ${activeIdx} / ${steps.length}`;
+      const orderHeading = document.getElementById('v-sim-order-heading');
+      if (orderHeading) {
+        orderHeading.textContent = vState.simAlgo === 'welsh-powell'
+          ? 'Welsh–Powell Order (Non-Increasing Degree):'
+          : 'Default Greedy Order (Given Sequence):';
+      }
+
+      const pillsWrap = document.getElementById('v-sim-order-pills');
+      pillsWrap.innerHTML = list.map((v, i) => {
+        const done = i < activeIdx;
+        const isCur = i === activeIdx - 1;
+        const col = done ? steps[i].color : null;
+        return `
+          <span class="px-2.5 py-1 rounded-lg border text-xs font-mono flex items-center gap-1.5 ${isCur ? 'ring-2 ring-indigo-500 border-indigo-500 font-bold' : 'border-slate-200 bg-white'}"
+            style="${col ? `background:${getColorHex(col)}; color:#fff; border-color:transparent;` : ''}">
+            ${i + 1}. ${v.label} <span class="opacity-75">(deg=${degMap.get(v.id)})</span>
+          </span>
+        `;
+      }).join('');
+
+      const traceList = document.getElementById('v-sim-trace-list');
+      if (steps.length === 0) {
+        traceList.innerHTML = '<p class="text-slate-500">Add vertices in the sandbox above to dry-run greedy coloring.</p>';
+      } else {
+        traceList.innerHTML = steps.slice(0, activeIdx).map(st => `
+          <div class="p-2 rounded-lg bg-white border border-slate-200 flex items-center justify-between gap-2">
+            <span>
+              <strong class="font-mono text-indigo-900">Dry-Run #${st.step}: ${st.label}</strong> (deg=${st.deg}) —
+              neighbor colors={${st.forbidden.join(', ') || 'none'}} &rarr;
+            </span>
+            <span class="px-2 py-0.5 rounded text-white font-mono text-[11px]" style="background:${getColorHex(st.color)}">
+              Color ${st.color}
+            </span>
+          </div>
+        `).join('') || '<p class="text-slate-500">Click "Next Step" or "Run All Steps" to start the dry run.</p>';
+      }
+
+      const usedSet = new Set(steps.slice(0, activeIdx).map(s => s.color));
+      const chi = computeExactChromaticNumber(vState.vertices, vState.edges);
+      const banner = document.getElementById('v-limitation-banner');
+      const summaryLine = document.getElementById('v-sim-summary-line');
+
+      if (vState.vertices.length === 0) {
+        banner.className = 'rounded-xl px-4 py-3 text-xs sm:text-sm border bg-slate-50 border-slate-200 text-slate-700';
+        banner.textContent = 'Graph is empty.';
+        summaryLine.textContent = '';
+      } else if (activeIdx < steps.length) {
+        banner.className = 'rounded-xl px-4 py-3 text-xs sm:text-sm border bg-indigo-50/60 border-indigo-200 text-indigo-950';
+        banner.innerHTML = `<strong>Dry Run (${vState.simAlgo === 'welsh-powell' ? 'Welsh–Powell' : 'Default Greedy'}):</strong> Colored ${activeIdx} of ${steps.length} vertices. Exact chromatic number is <strong>&chi;(G) = ${chi}</strong>.`;
+        summaryLine.textContent = `Colors used so far: ${usedSet.size} | Exact χ(G) = ${chi}`;
+      } else {
+        const greedyK = usedSet.size;
+        if (greedyK > chi) {
+          banner.className = 'rounded-xl px-4 py-3 text-xs sm:text-sm border bg-amber-50 border-amber-300 text-amber-950';
+          banner.innerHTML = `<strong>Greedy Limitation:</strong> ${vState.simAlgo === 'welsh-powell' ? 'Welsh–Powell' : 'Default Greedy'} used <strong>${greedyK} colors</strong>, but <strong>&chi;(G) = ${chi}</strong>. Greedy cannot guarantee minimum colors on all graphs.`;
+        } else {
+          banner.className = 'rounded-xl px-4 py-3 text-xs sm:text-sm border bg-emerald-50 border-emerald-200 text-emerald-950';
+          banner.innerHTML = `<strong>Dry Run Complete:</strong> Used <strong>${greedyK} colors</strong> (exact <strong>&chi;(G) = ${chi}</strong>).`;
+        }
+        summaryLine.textContent = `Final Greedy Colors = ${greedyK} | Exact χ(G) = ${chi}`;
+      }
+
+      renderVertexSimGraph(steps.slice(0, activeIdx));
+    }
+
+    function renderVertexSimGraph(coloredSteps = []) {
+      const canvas = document.getElementById('vertex-sim-canvas');
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width || 560;
+      const height = 350;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+
+      const colorById = new Map(coloredSteps.map(s => [s.vertexId, s.color]));
+      const simVerts = vState.vertices.map(v => ({
+        ...v,
+        color: colorById.get(v.id) || null
+      }));
+
+      // Fit graph coordinates safely inside the simulator frame so wide presets never clip
+      if (simVerts.length > 0) {
+        const pad = 42;
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        simVerts.forEach(v => {
+          minX = Math.min(minX, v.x);
+          maxX = Math.max(maxX, v.x);
+          minY = Math.min(minY, v.y);
+          maxY = Math.max(maxY, v.y);
+        });
+        const spanX = Math.max(maxX - minX, 1);
+        const spanY = Math.max(maxY - minY, 1);
+        const availW = Math.max(width - pad * 2, 120);
+        const availH = Math.max(height - pad * 2, 120);
+        const scale = Math.min(1, availW / spanX, availH / spanY);
+        const srcCx = (minX + maxX) / 2;
+        const srcCy = (minY + maxY) / 2;
+        const dstCx = width / 2;
+        const dstCy = height / 2;
+
+        simVerts.forEach(v => {
+          v.x = dstCx + (v.x - srcCx) * scale;
+          v.y = dstCy + (v.y - srcCy) * scale;
+        });
+      }
+
+      vState.edges.forEach(e => {
+        drawSingleEdge(ctx, e, simVerts, { width: 2.2, strokeStyle: '#94a3b8' });
+      });
+
+      const lastStep = coloredSteps.length > 0 ? coloredSteps[coloredSteps.length - 1] : null;
+      simVerts.forEach(v => {
+        const isLast = lastStep && lastStep.vertexId === v.id;
+        drawVertexNode(ctx, v, {
+          radius: 19,
+          ringWidth: isLast ? 3.5 : 2,
+          ringColor: isLast ? '#4f46e5' : '#0f172a'
+        });
+      });
+
+      ctx.restore();
+    }
+
+    // =====================================================================
+    // EDGE COLORING SANDBOX, LINE GRAPH L(G) & SIDE-BY-SIDE GREEDY STUDIO
+    // =====================================================================
+    const eState = {
+      vertices: [],
+      edges: [],
+      tool: 'move',
+      edgeStyle: 'straight',
+      brushColor: 1,
+      selectedStartId: null,
+      draggingVertexId: null,
+      pointerPos: null,
+      simAlgo: 'default',
+      simStepIndex: 0,
+      simSpeed: 'normal',
+      simTimer: null
+    };
+
+    function stopEdgeAutoRun() {
+      if (eState.simTimer) {
+        clearInterval(eState.simTimer);
+        eState.simTimer = null;
+      }
+      const btn = document.getElementById('e-run-all-btn');
+      if (btn) btn.textContent = 'Run All Steps';
+    }
+
+    function setEdgeSimSpeed(val) {
+      eState.simSpeed = val;
+      if (eState.simTimer) {
+        stopEdgeAutoRun();
+        toggleRunAllEdgeGreedy();
+      }
+    }
+
+    function toggleRunAllEdgeGreedy() {
+      if (eState.simTimer) {
+        stopEdgeAutoRun();
+        return;
+      }
+      const { steps } = computeEdgeGreedySteps();
+      if (steps.length === 0) return;
+      if (eState.simStepIndex >= steps.length) {
+        eState.simStepIndex = 0;
+        updateEdgeGreedyUI();
+      }
+      const btn = document.getElementById('e-run-all-btn');
+      if (btn) btn.textContent = 'Pause';
+
+      eState.simTimer = setInterval(() => {
+        const current = computeEdgeGreedySteps();
+        if (eState.simStepIndex >= current.steps.length) {
+          stopEdgeAutoRun();
+          return;
+        }
+        eState.simStepIndex++;
+        updateEdgeGreedyUI();
+        if (eState.simStepIndex >= current.steps.length) {
+          stopEdgeAutoRun();
+        }
+      }, getDelayMs(eState.simSpeed));
+    }
+
+    function initEdgePalette() {
+      const wrap = document.getElementById('e-color-palette');
+      if (!wrap) return;
+      wrap.innerHTML = COLOR_PALETTE.map(col => `
+        <button onclick="setEdgeBrushColor(${col.id})" title="${col.name}"
+          class="w-7 h-7 rounded-full border-2 transition flex items-center justify-center text-[11px] font-bold ${eState.brushColor === col.id ? 'border-slate-950 scale-110 shadow-xs' : 'border-white shadow-2xs'}"
+          style="background-color:${col.hex}; color:${col.text}">
+          ${col.id}
+        </button>
+      `).join('');
+    }
+
+    function setEdgeBrushColor(id) {
+      eState.brushColor = id;
+      eState.tool = 'move';
+      updateEdgeToolButtons();
+      initEdgePalette();
+    }
+
+    function setEdgeTool(tool) {
+      eState.tool = tool;
+      eState.selectedStartId = null;
+      updateEdgeToolButtons();
+      updateEdgeHelper();
+      renderEdgeAndLineGraph();
+    }
+
+    function setEdgeStyle(style) {
+      eState.edgeStyle = style;
+      ['straight', 'curved', 'loop'].forEach(s => {
+        const btn = document.getElementById(`e-edge-${s}`);
+        if (!btn) return;
+        btn.className = s === style
+          ? 'px-2 py-1 rounded font-semibold bg-slate-900 text-white'
+          : 'px-2 py-1 rounded font-semibold text-slate-600 hover:bg-slate-100';
+      });
+      updateEdgeHelper();
+    }
+
+    function updateEdgeToolButtons() {
+      ['move', 'add-vertex', 'add-edge', 'delete'].forEach(t => {
+        const btn = document.getElementById(`e-tool-${t}`);
+        if (!btn) return;
+        if (t === 'delete') {
+          btn.className = eState.tool === t
+            ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 text-white transition'
+            : 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-rose-700 border border-rose-200 hover:bg-rose-50 transition';
+        } else {
+          btn.className = eState.tool === t
+            ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition'
+            : 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 transition';
+        }
+      });
+    }
+
+    function updateEdgeHelper() {
+      const banner = document.getElementById('e-edge-helper');
+      const txt = document.getElementById('e-edge-helper-text');
+      if (!banner || !txt) return;
+      if (eState.tool !== 'add-edge') {
+        banner.classList.add('hidden');
+        return;
+      }
+      banner.classList.remove('hidden');
+      if (eState.edgeStyle === 'loop') {
+        txt.textContent = 'Self-Loop mode active: click any vertex to create a self-loop.';
+      } else if (eState.selectedStartId !== null) {
+        const sv = eState.vertices.find(v => v.id === eState.selectedStartId);
+        txt.textContent = `Start vertex "${sv ? sv.label : eState.selectedStartId}" selected — now click an end vertex to draw the ${eState.edgeStyle} edge.`;
+      } else {
+        txt.textContent = `Click a start vertex, then click an end vertex to draw a ${eState.edgeStyle} edge.`;
+      }
+    }
+
+    function cancelEdgeSelection() {
+      eState.selectedStartId = null;
+      updateEdgeHelper();
+      renderEdgeAndLineGraph();
+    }
+
+    function clearEdgeColors() {
+      eState.edges.forEach(e => { e.color = null; });
+      renderEdgeAndLineGraph();
+    }
+
+    function autoColorProperEdges() {
+      eState.edges.forEach(e => { e.color = null; });
+      eState.edges.forEach((edge, idx) => {
+        const used = new Set();
+        eState.edges.forEach((other, oIdx) => {
+          if (idx === oIdx || !other.color) return;
+          if (edge.u === other.u || edge.u === other.v || edge.v === other.u || edge.v === other.v) {
+            used.add(other.color);
+          }
+        });
+        let c = 1;
+        while (used.has(c)) c++;
+        edge.color = c;
+      });
+      renderEdgeAndLineGraph();
+      showToast('Applied proper greedy edge coloring.');
+    }
+
+    function loadEdgePreset(preset) {
+      const canvas = document.getElementById('edge-sandbox-canvas');
+      const w = canvas ? canvas.clientWidth || 560 : 560;
+      const h = 380;
+      const cx = w / 2;
+      const cy = h / 2;
+
+      eState.vertices = [];
+      eState.edges = [];
+      eState.selectedStartId = null;
+
+      if (preset === 'k4') {
+        const pts = [
+          { lbl: 'A', x: cx - 95, y: cy - 95 },
+          { lbl: 'B', x: cx + 95, y: cy - 95 },
+          { lbl: 'C', x: cx + 95, y: cy + 95 },
+          { lbl: 'D', x: cx - 95, y: cy + 95 }
+        ];
+        pts.forEach((p, i) => eState.vertices.push({ id: i + 1, label: p.lbl, x: p.x, y: p.y, color: null }));
+        for (let i = 1; i <= 4; i++) {
+          for (let j = i + 1; j <= 4; j++) {
+            eState.edges.push(createEdgeObj(i, j, 'straight'));
+          }
+        }
+      } else if (preset === 'c5' || preset === 'c6') {
+        const count = preset === 'c5' ? 5 : 6;
+        for (let i = 0; i < count; i++) {
+          const ang = (i * 2 * Math.PI) / count - Math.PI / 2;
+          eState.vertices.push({
+            id: i + 1,
+            label: `v${i + 1}`,
+            x: cx + Math.cos(ang) * 115,
+            y: cy + Math.sin(ang) * 115,
+            color: null
+          });
+          eState.edges.push(createEdgeObj(i + 1, ((i + 1) % count) + 1, 'straight'));
+        }
+      } else if (preset === 'k5') {
+        for (let i = 0; i < 5; i++) {
+          const ang = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+          eState.vertices.push({
+            id: i + 1,
+            label: `v${i + 1}`,
+            x: cx + Math.cos(ang) * 120,
+            y: cy + Math.sin(ang) * 120,
+            color: null
+          });
+        }
+        for (let i = 1; i <= 5; i++) {
+          for (let j = i + 1; j <= 5; j++) {
+            eState.edges.push(createEdgeObj(i, j, 'straight'));
+          }
+        }
+      } else if (preset === 'star_k13') {
+        eState.vertices.push({ id: 1, label: 'u', x: cx, y: cy + 25, color: null });
+        eState.vertices.push({ id: 2, label: 'v₁', x: cx - 105, y: cy - 85, color: null });
+        eState.vertices.push({ id: 3, label: 'v₂', x: cx + 105, y: cy - 85, color: null });
+        eState.vertices.push({ id: 4, label: 'v₃', x: cx, y: cy + 125, color: null });
+        eState.edges.push(createEdgeObj(1, 2, 'straight'));
+        eState.edges.push(createEdgeObj(1, 3, 'straight'));
+        eState.edges.push(createEdgeObj(1, 4, 'straight'));
+      } else if (preset === 'prism') {
+        const top = [
+          { lbl: 'a', x: cx - 100, y: cy - 85 },
+          { lbl: 'b', x: cx + 100, y: cy - 85 },
+          { lbl: 'c', x: cx, y: cy - 35 }
+        ];
+        const bot = [
+          { lbl: "a'", x: cx - 100, y: cy + 85 },
+          { lbl: "b'", x: cx + 100, y: cy + 85 },
+          { lbl: "c'", x: cx, y: cy + 35 }
+        ];
+        [...top, ...bot].forEach((p, idx) => {
+          eState.vertices.push({ id: idx + 1, label: p.lbl, x: p.x, y: p.y, color: null });
+        });
+        [[1, 2], [2, 3], [3, 1], [4, 5], [5, 6], [6, 4], [1, 4], [2, 5], [3, 6]].forEach(([u, v]) => {
+          eState.edges.push(createEdgeObj(u, v, 'straight'));
+        });
+      } else if (preset === 'k33') {
+        for (let i = 0; i < 3; i++) {
+          eState.vertices.push({ id: i + 1, label: `a${i + 1}`, x: cx - 110, y: 95 + i * 95, color: null });
+          eState.vertices.push({ id: i + 4, label: `b${i + 1}`, x: cx + 110, y: 95 + i * 95, color: null });
+        }
+        for (let u = 1; u <= 3; u++) {
+          for (let v = 4; v <= 6; v++) {
+            eState.edges.push(createEdgeObj(u, v, 'straight'));
+          }
+        }
+      }
+
+      eState.simStepIndex = 0;
+      updateEdgeHelper();
+      renderEdgeAndLineGraph();
+      resetEdgeGreedySim();
+    }
+
+    function buildLineGraphData(vertices, edges) {
+      const vMap = new Map(vertices.map(v => [v.id, v]));
+      const lVerts = edges.map((e, idx) => {
+        const u = vMap.get(e.u);
+        const v = vMap.get(e.v);
+        const midX = u && v ? (e.u === e.v ? u.x : (u.x + v.x) / 2) : 120;
+        const midY = u && v ? (e.u === e.v ? u.y - 45 : (u.y + v.y) / 2) : 120;
+        return {
+          id: idx + 1,
+          label: `x${idx + 1}`,
+          x: midX,
+          y: midY,
+          color: e.color || null
+        };
+      });
+
+      const lEdges = [];
+      for (let i = 0; i < edges.length; i++) {
+        for (let j = i + 1; j < edges.length; j++) {
+          const e1 = edges[i];
+          const e2 = edges[j];
+          if (e1.u === e2.u || e1.u === e2.v || e1.v === e2.u || e1.v === e2.v) {
+            lEdges.push(createEdgeObj(i + 1, j + 1, 'straight'));
+          }
+        }
+      }
+      return { lVerts, lEdges };
+    }
+
+    function renderEdgeAndLineGraph() {
+      const canvas = document.getElementById('edge-sandbox-canvas');
+      const lCanvas = document.getElementById('line-graph-canvas');
+      if (!canvas || !lCanvas) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width || 540;
+      const height = 380;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+
+      const vMap = new Map(eState.vertices.map(v => [v.id, v]));
+      const clashEdgeIndices = new Set();
+      for (let i = 0; i < eState.edges.length; i++) {
+        const e1 = eState.edges[i];
+        if (!e1.color) continue;
+        for (let j = i + 1; j < eState.edges.length; j++) {
+          const e2 = eState.edges[j];
+          if (!e2.color || e1.color !== e2.color) continue;
+          if (e1.u === e2.u || e1.u === e2.v || e1.v === e2.u || e1.v === e2.v) {
+            clashEdgeIndices.add(i);
+            clashEdgeIndices.add(j);
+          }
+        }
+      }
+
+      if (eState.tool === 'add-edge' && eState.selectedStartId !== null && eState.pointerPos && eState.edgeStyle !== 'loop') {
+        const sv = vMap.get(eState.selectedStartId);
+        if (sv) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(sv.x, sv.y);
+          ctx.lineTo(eState.pointerPos.x, eState.pointerPos.y);
+          ctx.strokeStyle = '#059669';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([6, 4]);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      eState.edges.forEach((e, idx) => {
+        const isClash = clashEdgeIndices.has(idx);
+        drawSingleEdge(ctx, e, eState.vertices, {
+          width: isClash ? 4.5 : (e.color ? 3.8 : 2.4),
+          strokeStyle: isClash ? '#e11d48' : (e.color ? getColorHex(e.color) : '#64748b')
+        });
+      });
+
+      eState.vertices.forEach(v => {
+        const isSel = eState.selectedStartId === v.id;
+        drawVertexNode(ctx, v, {
+          radius: 19,
+          fill: '#ffffff',
+          darkFill: false,
+          ringWidth: isSel ? 3.5 : 2.2,
+          ringColor: isSel ? '#059669' : '#0f172a'
+        });
+      });
+
+      ctx.restore();
+
+      // Render Line Graph L(G)
+      const lRect = lCanvas.getBoundingClientRect();
+      const lWidth = lRect.width || 420;
+      const lHeight = 380;
+      lCanvas.width = Math.round(lWidth * dpr);
+      lCanvas.height = Math.round(lHeight * dpr);
+
+      const lCtx = lCanvas.getContext('2d');
+      lCtx.save();
+      lCtx.scale(dpr, dpr);
+      lCtx.clearRect(0, 0, lWidth, lHeight);
+
+      lCtx.fillStyle = '#0f172a';
+      lCtx.font = 'bold 12px Inter, sans-serif';
+      lCtx.fillText('Line Graph L(G) — Edge Adjacency Bridge', 14, 22);
+
+      const { lVerts, lEdges } = buildLineGraphData(eState.vertices, eState.edges);
+      if (lVerts.length > 0) {
+        const lcx = lWidth / 2;
+        const lcy = lHeight / 2 + 8;
+        const rad = Math.min(lWidth, lHeight) * 0.34;
+        lVerts.forEach((lv, i) => {
+          const ang = (i * 2 * Math.PI) / lVerts.length - Math.PI / 2;
+          lv.x = lcx + Math.cos(ang) * rad;
+          lv.y = lcy + Math.sin(ang) * rad;
+        });
+
+        lEdges.forEach(le => drawSingleEdge(lCtx, le, lVerts, { width: 1.8, strokeStyle: '#94a3b8' }));
+        lVerts.forEach(lv => drawVertexNode(lCtx, lv, { radius: 17, ringWidth: 2, ringColor: '#0f172a' }));
+      } else {
+        lCtx.fillStyle = '#64748b';
+        lCtx.font = '12px Inter, sans-serif';
+        lCtx.fillText('Draw edges in G to construct L(G).', 14, 52);
+      }
+      lCtx.restore();
+
+      // Diagnostics & Bounds
+      const n = eState.vertices.length;
+      const m = eState.edges.length;
+      const degs = eState.vertices.map(v => {
+        let d = 0;
+        eState.edges.forEach(e => {
+          if (e.u === e.v && e.u === v.id) d += 2;
+          else if (e.u === v.id || e.v === v.id) d += 1;
+        });
+        return d;
+      });
+      const delta = degs.length ? Math.max(...degs) : 0;
+      const vizingLo = m > 0 ? delta : 0;
+      const vizingHi = m > 0 ? delta + 1 : 0;
+      const overfull = n > 0 && delta > 0 && m > Math.floor(n / 2) * delta;
+      const chiPrimeExact = m === 0 ? 0 : computeExactChromaticNumber(lVerts, lEdges);
+
+      document.getElementById('e-stat-counts').textContent = `n=${n}/${MAX_VERTICES}, m=${m}`;
+      document.getElementById('e-stat-delta').textContent = `Δ=${delta}`;
+      document.getElementById('e-stat-vizing').textContent = `Vizing=[${vizingLo}..${vizingHi}]`;
+      document.getElementById('e-stat-chi-prime').textContent = `χ'(G)=${chiPrimeExact}`;
+      document.getElementById('e-stat-conflicts').textContent = `Clashes=${clashEdgeIndices.size}`;
+
+      const diag = document.getElementById('e-diagnostics-bar');
+      if (diag) {
+        const clsLabel = m === 0
+          ? 'Edgeless (χ\'(G) = 0)'
+          : (chiPrimeExact === delta ? 'Class 1 (χ\'(G) = Δ)' : 'Class 2 (χ\'(G) = Δ + 1)');
+        diag.innerHTML = `
+          <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-800 font-mono">Line Graph: |V(L(G))|=${lVerts.length}, |E(L(G))|=${lEdges.length}</span>
+          <span class="px-2.5 py-1 rounded-md ${chiPrimeExact === delta ? 'bg-emerald-100 text-emerald-900' : 'bg-amber-100 text-amber-900'} font-semibold">${clsLabel}</span>
+          <span class="px-2.5 py-1 rounded-md ${overfull ? 'bg-rose-100 text-rose-900 font-semibold' : 'bg-slate-100 text-slate-700'}">
+            Overfull (m > ⌊n/2⌋Δ): ${overfull ? 'Yes → Class 2' : 'No'}
+          </span>
+        `;
+      }
+    }
+
+    function bindEdgeCanvasEvents() {
+      const canvas = document.getElementById('edge-sandbox-canvas');
+      if (!canvas) return;
+
+      function getPos(evt) {
+        const rect = canvas.getBoundingClientRect();
+        return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+      }
+
+      function findVertexAt(x, y) {
+        for (let i = eState.vertices.length - 1; i >= 0; i--) {
+          const v = eState.vertices[i];
+          if (Math.hypot(x - v.x, y - v.y) <= 23) return v;
+        }
+        return null;
+      }
+
+      function findEdgeAt(x, y) {
+        for (let i = eState.edges.length - 1; i >= 0; i--) {
+          if (pointToEdgeDistance(x, y, eState.edges[i], eState.vertices) <= 8) return i;
+        }
+        return -1;
+      }
+
+      canvas.addEventListener('pointerdown', evt => {
+        const pos = getPos(evt);
+        const hitV = findVertexAt(pos.x, pos.y);
+
+        if (eState.tool === 'add-vertex') {
+          if (eState.vertices.length >= MAX_VERTICES) {
+            showToast(`Maximum ${MAX_VERTICES} vertices reached.`);
+            return;
+          }
+          const nextNum = eState.vertices.length + 1;
+          eState.vertices.push({
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            label: `v${nextNum}`,
+            x: Math.max(28, Math.min(pos.x, (canvas.clientWidth || 540) - 28)),
+            y: Math.max(28, Math.min(pos.y, 352)),
+            color: null
+          });
+          renderEdgeAndLineGraph();
+          resetEdgeGreedySim();
+          return;
+        }
+
+        if (eState.tool === 'add-edge') {
+          if (!hitV) return;
+          if (eState.edgeStyle === 'loop') {
+            eState.edges.push(createEdgeObj(hitV.id, hitV.id, 'loop'));
+            renderEdgeAndLineGraph();
+            resetEdgeGreedySim();
+            showToast(`Added self-loop on ${hitV.label}.`);
+            return;
+          }
+          if (eState.selectedStartId === null) {
+            eState.selectedStartId = hitV.id;
+            updateEdgeHelper();
+            renderEdgeAndLineGraph();
+          } else {
+            const startId = eState.selectedStartId;
+            const endId = hitV.id;
+            eState.selectedStartId = null;
+            updateEdgeHelper();
+            if (startId === endId) {
+              showToast('Choose a different end vertex or switch Edge Style to Self Loop.');
+              renderEdgeAndLineGraph();
+              return;
+            }
+            const exists = eState.edges.some(e => (e.u === startId && e.v === endId) || (e.u === endId && e.v === startId));
+            if (exists) {
+              showToast('Edge between these two vertices already exists.');
+              renderEdgeAndLineGraph();
+              return;
+            }
+            eState.edges.push(createEdgeObj(startId, endId, eState.edgeStyle));
+            renderEdgeAndLineGraph();
+            resetEdgeGreedySim();
+          }
+          return;
+        }
+
+        if (eState.tool === 'delete') {
+          if (hitV) {
+            eState.vertices = eState.vertices.filter(v => v.id !== hitV.id);
+            eState.edges = eState.edges.filter(e => e.u !== hitV.id && e.v !== hitV.id);
+            renderEdgeAndLineGraph();
+            resetEdgeGreedySim();
+            return;
+          }
+          const eIdx = findEdgeAt(pos.x, pos.y);
+          if (eIdx !== -1) {
+            eState.edges.splice(eIdx, 1);
+            renderEdgeAndLineGraph();
+            resetEdgeGreedySim();
+          }
+          return;
+        }
+
+        if (eState.tool === 'move') {
+          const eIdx = findEdgeAt(pos.x, pos.y);
+          if (eIdx !== -1) {
+            const ed = eState.edges[eIdx];
+            ed.color = ed.color === eState.brushColor ? null : eState.brushColor;
+            renderEdgeAndLineGraph();
+            return;
+          }
+          if (hitV) {
+            eState.draggingVertexId = hitV.id;
+            canvas.setPointerCapture(evt.pointerId);
+          }
+        }
+      });
+
+      canvas.addEventListener('pointermove', evt => {
+        const pos = getPos(evt);
+        eState.pointerPos = pos;
+        if (eState.draggingVertexId !== null && eState.tool === 'move') {
+          const v = eState.vertices.find(item => item.id === eState.draggingVertexId);
+          if (v) {
+            v.x = Math.max(24, Math.min(pos.x, (canvas.clientWidth || 540) - 24));
+            v.y = Math.max(24, Math.min(pos.y, 356));
+            renderEdgeAndLineGraph();
+          }
+        } else if (eState.tool === 'add-edge' && eState.selectedStartId !== null) {
+          renderEdgeAndLineGraph();
+        }
+      });
+
+      canvas.addEventListener('pointerup', evt => {
+        if (eState.draggingVertexId !== null) {
+          eState.draggingVertexId = null;
+          try { canvas.releasePointerCapture(evt.pointerId); } catch (e) {}
+        }
+      });
+    }
+
+    function setEdgeSimAlgo(algo) {
+      stopEdgeAutoRun();
+      eState.simAlgo = algo;
+      document.getElementById('esim-algo-default').className = algo === 'default'
+        ? 'px-3 py-1.5 rounded-lg bg-emerald-600 text-white transition'
+        : 'px-3 py-1.5 rounded-lg text-slate-700 hover:bg-white/60 transition';
+      document.getElementById('esim-algo-incidence').className = algo === 'incidence'
+        ? 'px-3 py-1.5 rounded-lg bg-emerald-600 text-white transition'
+        : 'px-3 py-1.5 rounded-lg text-slate-700 hover:bg-white/60 transition';
+      document.getElementById('e-pseudo-card-default').classList.toggle('hidden', algo !== 'default');
+      document.getElementById('e-pseudo-card-incidence').classList.toggle('hidden', algo !== 'incidence');
+      resetEdgeGreedySim();
+    }
+
+    function computeEdgeGreedySteps() {
+      const vMap = new Map(eState.vertices.map(v => [v.id, v]));
+      const degMap = new Map(eState.vertices.map(v => [v.id, 0]));
+      eState.edges.forEach(e => {
+        if (e.u === e.v) degMap.set(e.u, (degMap.get(e.u) || 0) + 2);
+        else {
+          degMap.set(e.u, (degMap.get(e.u) || 0) + 1);
+          degMap.set(e.v, (degMap.get(e.v) || 0) + 1);
+        }
+      });
+
+      const indexed = eState.edges.map((e, idx) => {
+        const uLbl = vMap.get(e.u)?.label || e.u;
+        const vLbl = vMap.get(e.v)?.label || e.v;
+        const weight = (degMap.get(e.u) || 0) + (degMap.get(e.v) || 0);
+        return { idx, edge: e, label: `${uLbl}${vLbl}`, weight };
+      });
+
+      if (eState.simAlgo === 'incidence') {
+        indexed.sort((a, b) => (b.weight - a.weight) || (a.idx - b.idx));
+      }
+
+      const assignedColorByIdx = new Map();
+      const steps = indexed.map((item, sIdx) => {
+        const forbidden = new Set();
+        eState.edges.forEach((other, oIdx) => {
+          if (oIdx === item.idx || !assignedColorByIdx.has(oIdx)) return;
+          if (
+            item.edge.u === other.u ||
+            item.edge.u === other.v ||
+            item.edge.v === other.u ||
+            item.edge.v === other.v
+          ) {
+            forbidden.add(assignedColorByIdx.get(oIdx));
+          }
+        });
+        let chosen = 1;
+        while (forbidden.has(chosen)) chosen++;
+        assignedColorByIdx.set(item.idx, chosen);
+        return {
+          step: sIdx + 1,
+          edgeIdx: item.idx,
+          label: item.label,
+          weight: item.weight,
+          forbidden: [...forbidden].sort((a, b) => a - b),
+          color: chosen
+        };
+      });
+
+      return { orderedItems: indexed, steps };
+    }
+
+    function resetEdgeGreedySim() {
+      stopEdgeAutoRun();
+      eState.simStepIndex = 0;
+      updateEdgeGreedyUI();
+    }
+
+    function stepEdgeGreedy(delta) {
+      stopEdgeAutoRun();
+      const { steps } = computeEdgeGreedySteps();
+      eState.simStepIndex = Math.max(0, Math.min(steps.length, eState.simStepIndex + delta));
+      updateEdgeGreedyUI();
+    }
+
+    function updateEdgeGreedyUI() {
+      const { orderedItems, steps } = computeEdgeGreedySteps();
+      const activeIdx = Math.min(eState.simStepIndex, steps.length);
+      const currentStep = activeIdx > 0 ? steps[activeIdx - 1] : null;
+
+      document.querySelectorAll('#e-pseudo-default .pseudo-line').forEach(el => {
+        el.classList.remove('pseudo-active-emerald');
+        if (eState.simAlgo === 'default') {
+          const ln = Number(el.dataset.line);
+          if (!currentStep && ln === 1) el.classList.add('pseudo-active-emerald');
+          else if (currentStep && activeIdx < steps.length && (ln === 3 || ln === 5)) el.classList.add('pseudo-active-emerald');
+          else if (currentStep && activeIdx === steps.length && ln === 6) el.classList.add('pseudo-active-emerald');
+        }
+      });
+
+      document.querySelectorAll('#e-pseudo-incidence .pseudo-line').forEach(el => {
+        el.classList.remove('pseudo-active-emerald');
+        if (eState.simAlgo === 'incidence') {
+          const ln = Number(el.dataset.line);
+          if (!currentStep && ln === 2) el.classList.add('pseudo-active-emerald');
+          else if (currentStep && activeIdx < steps.length && (ln === 3 || ln === 5)) el.classList.add('pseudo-active-emerald');
+          else if (currentStep && activeIdx === steps.length && ln === 6) el.classList.add('pseudo-active-emerald');
+        }
+      });
+
+      document.getElementById('e-sim-progress').textContent = `Step ${activeIdx} / ${steps.length}`;
+      const orderHeading = document.getElementById('e-sim-order-heading');
+      if (orderHeading) {
+        orderHeading.textContent = eState.simAlgo === 'incidence'
+          ? 'Welsh–Powell Edge Order (Decreasing Incident Weight):'
+          : 'Default Edge Order (Given Sequence):';
+      }
+
+      const pillsWrap = document.getElementById('e-sim-order-pills');
+      pillsWrap.innerHTML = orderedItems.map((it, i) => {
+        const done = i < activeIdx;
+        const isCur = i === activeIdx - 1;
+        const col = done ? steps[i].color : null;
+        return `
+          <span class="px-2.5 py-1 rounded-lg border text-xs font-mono ${isCur ? 'ring-2 ring-emerald-500 border-emerald-500 font-bold' : 'border-slate-200 bg-white'}"
+            style="${col ? `background:${getColorHex(col)}; color:#fff; border-color:transparent;` : ''}">
+            ${i + 1}. ${it.label} <span class="opacity-75">(w=${it.weight})</span>
+          </span>
+        `;
+      }).join('');
+
+      const traceList = document.getElementById('e-sim-trace-list');
+      if (steps.length === 0) {
+        traceList.innerHTML = '<p class="text-slate-500">No edges in graph to color.</p>';
+      } else {
+        traceList.innerHTML = steps.slice(0, activeIdx).map(st => `
+          <div class="p-2 rounded-lg bg-white border border-slate-200 flex items-center justify-between gap-2">
+            <span>
+              <strong class="font-mono text-emerald-950">Dry-Run #${st.step}: Edge ${st.label}</strong> (w=${st.weight}) —
+              incident colors={${st.forbidden.join(', ') || 'none'}} &rarr;
+            </span>
+            <span class="px-2 py-0.5 rounded text-white font-mono text-[11px]" style="background:${getColorHex(st.color)}">
+              Color ${st.color}
+            </span>
+          </div>
+        `).join('') || '<p class="text-slate-500">Click "Next Step" or "Run All Steps" to start the dry run.</p>';
+      }
+
+      const usedColors = new Set(steps.slice(0, activeIdx).map(s => s.color));
+      const { lVerts, lEdges } = buildLineGraphData(eState.vertices, eState.edges);
+      const chiPrimeExact = eState.edges.length === 0 ? 0 : computeExactChromaticNumber(lVerts, lEdges);
+      const banner = document.getElementById('e-limitation-banner');
+      const summaryLine = document.getElementById('e-sim-summary-line');
+
+      if (eState.edges.length === 0) {
+        banner.className = 'rounded-xl px-4 py-3 text-xs sm:text-sm border bg-slate-50 border-slate-200 text-slate-700';
+        banner.textContent = 'Add edges in the sandbox above to trace greedy edge coloring.';
+        summaryLine.textContent = '';
+      } else if (activeIdx < steps.length) {
+        banner.className = 'rounded-xl px-4 py-3 text-xs sm:text-sm border bg-emerald-50/60 border-emerald-200 text-emerald-950';
+        banner.innerHTML = `<strong>Dry Run (${eState.simAlgo === 'incidence' ? 'Welsh–Powell' : 'Default Greedy'}):</strong> Colored ${activeIdx} of ${steps.length} edges. Exact chromatic index is <strong>&chi;'(G) = ${chiPrimeExact}</strong>.`;
+        summaryLine.textContent = `Colors used so far: ${usedColors.size} | Exact χ'(G) = ${chiPrimeExact}`;
+      } else {
+        const k = usedColors.size;
+        if (k > chiPrimeExact) {
+          banner.className = 'rounded-xl px-4 py-3 text-xs sm:text-sm border bg-amber-50 border-amber-300 text-amber-950';
+          banner.innerHTML = `<strong>Greedy Edge Limitation:</strong> Used <strong>${k} colors</strong>, exceeding <strong>&chi;'(G) = ${chiPrimeExact}</strong>. Greedy edge ordering does not always reach minimum edge colors.`;
+        } else {
+          banner.className = 'rounded-xl px-4 py-3 text-xs sm:text-sm border bg-emerald-50 border-emerald-200 text-emerald-950';
+          banner.innerHTML = `<strong>Dry Run Complete:</strong> Used <strong>${k} colors</strong> (exact <strong>&chi;'(G) = ${chiPrimeExact}</strong>).`;
+        }
+        summaryLine.textContent = `Final Greedy Edge Colors = ${k} | Exact χ'(G) = ${chiPrimeExact}`;
+      }
+
+      renderEdgeSimGraph(steps.slice(0, activeIdx));
+    }
+
+    function renderEdgeSimGraph(coloredSteps = []) {
+      const canvas = document.getElementById('edge-sim-canvas');
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width || 560;
+      const height = 350;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+
+      const colorByEdgeIdx = new Map(coloredSteps.map(s => [s.edgeIdx, s.color]));
+      const lastEdgeIdx = coloredSteps.length > 0 ? coloredSteps[coloredSteps.length - 1].edgeIdx : -1;
+
+      eState.edges.forEach((e, idx) => {
+        const c = colorByEdgeIdx.get(idx) || null;
+        drawSingleEdge(ctx, e, eState.vertices, {
+          width: idx === lastEdgeIdx ? 4.5 : (c ? 3.6 : 2.2),
+          strokeStyle: c ? getColorHex(c) : '#94a3b8'
+        });
+      });
+
+      eState.vertices.forEach(v => {
+        drawVertexNode(ctx, v, { radius: 18, fill: '#ffffff', darkFill: false, ringWidth: 2, ringColor: '#0f172a' });
+      });
+
+      ctx.restore();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initVertexPalette();
+      initEdgePalette();
+      bindVertexCanvasEvents();
+      bindEdgeCanvasEvents();
+
+      renderExamDemo();
+      setRegisterCase('p4');
+      renderTournamentDemo();
+
+      loadVertexPreset('crown');
+      loadEdgePreset('k4');
+      updateSubPageTabs();
+      renderMath();
+    });
+
+    window.addEventListener('resize', () => {
+      if (activeSubPage === 'lab') {
+        renderVertexGraph();
+        renderVertexSimGraph();
+        renderEdgeAndLineGraph();
+        renderEdgeSimGraph();
+      }
+    });
+  </script>
+</body>
+</html>
