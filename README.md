@@ -4,6 +4,7 @@
 An interactive, web-based educational platform designed for **B.Tech CSE – Discrete Mathematics & Graph Theory** to visualize, experiment with, and understand **Vertex Coloring** and **Edge Coloring**.
 
 **Author:** Surajit Sahoo
+
 🚀 **Live Demo:** [https://surajit-sahoo-iitian.github.io/graph-coloring-lab/](https://surajit-sahoo-iitian.github.io/graph-coloring-lab/)
 ---
 
